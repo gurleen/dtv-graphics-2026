@@ -1,0 +1,26 @@
+{
+  "name": "dtv-graphics-2026",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@gsap/react": "^2.1.2",
+    "@microsoft/signalr": "^9.0.6",
+    "@number-flow/react": "^0.5.10",
+    "@types/react-dom": "^19.2.1",
+    "bun-plugin-tailwind": "^0.1.2",
+    "color-core": "^1.4.0",
+    "emittery": "^1.2.0",
+    "gsap": "^3.13.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "swr": "^2.3.6",
+    "tailwindcss": "^4.1.14"
+  }
+}
