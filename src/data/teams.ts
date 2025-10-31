@@ -1,5 +1,5 @@
 import useSWR from "swr"
-import type { TeamData, AppState, CurrentGameState } from "./models";
+import type { TeamData, AppState, CurrentGameState, GameState } from "./models";
 
 const API_BASE_URL = "http://localhost:5069"
 
@@ -18,7 +18,7 @@ export default function fetchLiveData() {
 }
 
 export function currentGameState() {
-    const { data, error } = useSWR<CurrentGameState>('/api/state/game', fetcher);
+    const { data, error } = useSWR<GameState>('/api/state/game', fetcher);
     if(error) { console.error(error); }
     return data;
 }

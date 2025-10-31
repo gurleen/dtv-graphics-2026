@@ -5,11 +5,19 @@ export interface TeamGameState {
     bonus: boolean
 }
 
+export enum Sport {
+    MensBasketball = 0,
+    WomensBasketball = 1,
+    Wrestling = 2
+}
+
 export interface GameState {
+    sport: Sport
     clock: number
     clockDisplay: string
     shotClock: number
     period: number
+    fullPeriodName: string
     periodDisplay: string
     homeTeam: TeamGameState
     awayTeam: TeamGameState
@@ -78,7 +86,7 @@ export interface Player {
     hometown: string
 }
 
-export type Sport = 'mbb' | 'wbb';
+
 export function getPlayerHeadshot(teamId: string, sport: Sport, jerseyNumber: string) {
     return `https://images.dragonstv.io/headshots/${teamId}/${sport}/${jerseyNumber}.png`;
 }

@@ -1,7 +1,7 @@
 import AnimationContainer from '@/components/animation-container';
 import { Rect } from '@/components/rect';
-import type { CurrentGameState } from '@/data/models';
-import { currentGameState, useAppState, type AppState, type Team } from '@/data/teams';
+import type { AppState, CurrentGameState, GameState, Team } from '@/data/models';
+import { currentGameState, useAppState } from '@/data/teams';
 import useAnimation from '@/util/use-animation';
 import { useMemo } from 'react';
 import * as ReactDOM from 'react-dom/client';
@@ -28,7 +28,7 @@ function PageRoot() {
     );
 }
 
-function ScoreToBreak({ state, gfx }: {state: CurrentGameState, gfx: AppState}) {
+function ScoreToBreak({ state, gfx }: {state: GameState, gfx: AppState}) {
     const container = useAnimation(animation);
 
     return (
