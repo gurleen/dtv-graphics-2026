@@ -1,5 +1,4 @@
 import Emittery from 'emittery';
-import { TypedLiveDataHubClient } from '@/data/typedLiveDataHubClient';
 
 export const EventBus = new Emittery();
 EventBus.onAny((name, data) => {

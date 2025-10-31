@@ -4,11 +4,12 @@ import { getPlayerHeadshot, type AppState, type Player, type Sport, type Team, t
 import { useAppState, useTeamData } from '@/data/teams';
 import { ZLayers } from '@/util/layers';
 import useAnimation from '@/util/use-animation';
+import useProps from '@/util/use-props';
 import { useMemo } from 'react';
 import * as ReactDOM from 'react-dom/client';
+import type { StartingLineupsLowerProps } from './props';
 
 const sponsorLogo = "https://images.dragonstv.io/sponsors/Independence.png";
-const confLogo = "https://images.dragonstv.io/sponsors/CAAWhite.png";
 
 function animation(timeline: gsap.core.Timeline) {
     timeline
@@ -19,44 +20,53 @@ function animation(timeline: gsap.core.Timeline) {
 }
 
 function PageRoot() {
+    const props = useProps<StartingLineupsLowerProps>();
     const appState = useAppState();
-    const isHome = true;
 
     return (
         <>
-            {appState && <Matchup gfx={appState} isHome={isHome} />}
+            {appState && props && <StartingLineupsLower gfx={appState} props={props} />}
         </>
     );
 }
 
-function Matchup({ gfx, isHome }: { gfx: AppState, isHome: boolean }) {
+function StartingLineupsLower({ gfx, props }: { gfx: AppState, props: StartingLineupsLowerProps }) {
 
-    const team = isHome ? gfx.homeTeam : gfx.awayTeam;
-    const teamData = useTeamData(isHome);
+    const team = props.isHome ? gfx.homeTeam : gfx.awayTeam;
+    const teamData = useTeamData(props.isHome);
 
     return (
         <>
-            {teamData && <MainArea team={team} teamData={teamData} />}
+            {teamData && <MainArea team={team} teamData={teamData} props={props} />}
         </>
     );
 }
 
-function MainArea({ team, teamData }: { team: Team, teamData: TeamData }) {
+function getPlayer(teamData: TeamData, shirtNum: number): Player | undefined {
+    return teamData.players.find(x => x.jerseyNumber == shirtNum.toString())
+}
+
+function MainArea({ team, teamData, props }: { team: Team, teamData: TeamData, props: StartingLineupsLowerProps }) {
     const container = useAnimation(animation);
+    const player1 = useMemo(() => getPlayer(teamData, props.starter1), [teamData, props]);
+    const player2 = useMemo(() => getPlayer(teamData, props.starter2), [teamData, props]);
+    const player3 = useMemo(() => getPlayer(teamData, props.starter3), [teamData, props]);
+    const player4 = useMemo(() => getPlayer(teamData, props.starter4), [teamData, props]);
+    const player5 = useMemo(() => getPlayer(teamData, props.starter5), [teamData, props]);
 
     return (
         <div ref={container} style={{ fontFamily: 'Zuume Medium' }}>
             <AnimationContainer debug={false}>
                 <div id="starting-lineups-mask" className='overflow-hidden'>
-                    <div id='starting-lineups' className='flex flex-col' style={{ marginTop: 872 }}>
+                    <div id='starting-lineups' className='flex flex-col' style={{ marginTop: 875 }}>
                         <Rect height={140} width={1920} className='flex' style={{ overflow: 'visible' }}>
                             <TeamBox team={team} />
                             <Rect width={920} height={140} color='#D8D8D8' className='flex anim-group-1' style={{ overflow: 'visible' }}>
-                                {teamData.players.length > 0 && <PlayerBox player={teamData.players[0]!} team={team} sport='wbb' />}
-                                {teamData.players.length > 1 && <PlayerBox player={teamData.players[1]!} team={team} sport='wbb' />}
-                                {teamData.players.length > 2 && <PlayerBox player={teamData.players[2]!} team={team} sport='wbb' />}
-                                {teamData.players.length > 3 && <PlayerBox player={teamData.players[3]!} team={team} sport='wbb' />}
-                                {teamData.players.length > 4 && <PlayerBox player={teamData.players[4]!} team={team} sport='wbb' />}
+                                {player1 && <PlayerBox player={player1} team={team} sport='wbb' />}
+                                {player2 && <PlayerBox player={player2} team={team} sport='wbb' />}
+                                {player3 && <PlayerBox player={player3} team={team} sport='wbb' />}
+                                {player4 && <PlayerBox player={player4} team={team} sport='wbb' />}
+                                {player5 && <PlayerBox player={player5} team={team} sport='wbb' />}
                             </Rect>
                             <SponsorBar />
                         </Rect>
