@@ -1,6 +1,6 @@
 import AnimationContainer from '@/components/animation-container';
 import { Rect } from '@/components/rect';
-import { getPlayerHeadshot, type AppState, type Player, type Sport, type Team, type TeamData } from '@/data/models';
+import { getPlayerHeadshot, Sport, type AppState, type Player, type Team, type TeamData } from '@/data/models';
 import { useAppState, useTeamData } from '@/data/teams';
 import { ZLayers } from '@/util/layers';
 import useAnimation from '@/util/use-animation';
@@ -19,8 +19,20 @@ function animation(timeline: gsap.core.Timeline) {
         .to("#starting-lineups", { y: 250, duration: 0.5, ease: 'circ.out' })
 }
 
+function GetTestProps(): StartingLineupsLowerProps {
+    return {
+    isHome: '0',
+    starter1: 0,
+    starter2: 1,
+    starter3: 2,
+    starter4: 3,
+    starter5: 4
+}
+}
+
 function PageRoot() {
     const props = useProps<StartingLineupsLowerProps>();
+    // const props = GetTestProps();
     const appState = useAppState();
 
     return (
@@ -31,9 +43,9 @@ function PageRoot() {
 }
 
 function StartingLineupsLower({ gfx, props }: { gfx: AppState, props: StartingLineupsLowerProps }) {
-
-    const team = props.isHome ? gfx.homeTeam : gfx.awayTeam;
-    const teamData = useTeamData(props.isHome);
+    const isHome = props.isHome == "1";
+    const team = isHome ? gfx.homeTeam : gfx.awayTeam;
+    const teamData = useTeamData(isHome);
 
     return (
         <>
@@ -62,11 +74,11 @@ function MainArea({ team, teamData, props }: { team: Team, teamData: TeamData, p
                         <Rect height={140} width={1920} className='flex' style={{ overflow: 'visible' }}>
                             <TeamBox team={team} />
                             <Rect width={920} height={140} color='#D8D8D8' className='flex anim-group-1' style={{ overflow: 'visible' }}>
-                                {player1 && <PlayerBox player={player1} team={team} sport='wbb' />}
-                                {player2 && <PlayerBox player={player2} team={team} sport='wbb' />}
-                                {player3 && <PlayerBox player={player3} team={team} sport='wbb' />}
-                                {player4 && <PlayerBox player={player4} team={team} sport='wbb' />}
-                                {player5 && <PlayerBox player={player5} team={team} sport='wbb' />}
+                                {player1 && <PlayerBox player={player1} team={team} sport={Sport.MensBasketball} />}
+                                {player2 && <PlayerBox player={player2} team={team} sport={Sport.MensBasketball} />}
+                                {player3 && <PlayerBox player={player3} team={team} sport={Sport.MensBasketball} />}
+                                {player4 && <PlayerBox player={player4} team={team} sport={Sport.MensBasketball} />}
+                                {player5 && <PlayerBox player={player5} team={team} sport={Sport.MensBasketball} />}
                             </Rect>
                             <SponsorBar />
                         </Rect>

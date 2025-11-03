@@ -1,5 +1,5 @@
 export interface StartingLineupsLowerProps {
-    isHome: boolean
+    isHome: string
     starter1: number
     starter2: number
     starter3: number

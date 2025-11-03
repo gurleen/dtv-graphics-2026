@@ -86,9 +86,16 @@ export interface Player {
     hometown: string
 }
 
+export function getShortCodeForSport(sport: Sport) {
+    if(sport == Sport.MensBasketball) return 'mbb';
+    if(sport == Sport.WomensBasketball) return 'wbb';
+    if(sport == Sport.Wrestling) return 'wrest';
+    return '';
+}
 
 export function getPlayerHeadshot(teamId: string, sport: Sport, jerseyNumber: string) {
-    return `https://images.dragonstv.io/headshots/${teamId}/${sport}/${jerseyNumber}.png`;
+    const shortCode = getShortCodeForSport(sport);
+    return `https://images.dragonstv.io/headshots/${teamId}/${shortCode}/${jerseyNumber}.png`;
 }
 
 export interface TeamData {

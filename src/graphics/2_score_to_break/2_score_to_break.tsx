@@ -21,7 +21,7 @@ function PageRoot() {
     const appState = useAppState();
     const gameState = currentGameState();
 
-    return (
+    return  (
         <>
             {gameState && appState && <ScoreToBreak state={gameState} gfx={appState} />}
         </>
@@ -38,11 +38,11 @@ function ScoreToBreak({ state, gfx }: {state: GameState, gfx: AppState}) {
                     <Rect width={437} height={373} color="#131313">
                         <div className='flex'>
                             <TeamBox team={gfx.awayTeam}  />
-                            <ScoreBox score={state.awayScore} isHome={false} />
+                            <ScoreBox score={state.awayTeam.score} isHome={false} />
                         </div>
                         <div className='flex'>
                             <TeamBox team={gfx.homeTeam} />
-                            <ScoreBox score={state.homeScore} isHome={true} />
+                            <ScoreBox score={state.homeTeam.score} isHome={true} />
                         </div>
                         <BottomBar periodText={state.fullPeriodName} />
                     </Rect>

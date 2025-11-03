@@ -7,7 +7,8 @@ import { ZLayers } from '@/util/layers';
 import useAnimation from '@/util/use-animation';
 import { useMemo } from 'react';
 import * as ReactDOM from 'react-dom/client';
-import ImageGlow from 'react-image-glow';
+import type { HalftimeAdjustmentsProps } from './props';
+import useProps from '@/util/use-props';
 
 const sponsorLogo = "https://images.dragonstv.io/sponsors/Rothman-transparent.png";
 
@@ -23,26 +24,34 @@ function animation(timeline: gsap.core.Timeline) {
         .to("#halftime-adjustments-mask", { duration: 0.5, opacity: 0, ease: 'circ.out' })
 }
 
+function GetTestProps(): HalftimeAdjustmentsProps {
+    return {
+        homeAdjustment: "THIS IS THE HOME ADJUSTMENT",
+        awayAdjustment: "THIS IS THE AWAY ADJUSTMENT"
+    }
+}
+
 function PageRoot() {
     const appState = useAppState();
     const gameState = currentGameState();
+    const props = useProps<HalftimeAdjustmentsProps>();
 
     return (
         <>
-            {appState && gameState && <HalftimeAdjustments gfx={appState} game={gameState} />}
+            {appState && gameState && props && <HalftimeAdjustments gfx={appState} game={gameState} props={props} />}
         </>
     );
 }
 
-function HalftimeAdjustments({ gfx, game }: { gfx: AppState, game: GameState }) {
+function HalftimeAdjustments({ gfx, game, props }: { gfx: AppState, game: GameState, props: HalftimeAdjustmentsProps }) {
     return (
         <>
-            {<MainArea appState={gfx} game={game} />}
+            {<MainArea appState={gfx} game={game} props={props} />}
         </>
     );
 }
 
-function MainArea({ appState, game }: { appState: AppState, game: GameState }) {
+function MainArea({ appState, game, props }: { appState: AppState, game: GameState, props: HalftimeAdjustmentsProps }) {
     const container = useAnimation(animation);
 
     return (
@@ -51,7 +60,7 @@ function MainArea({ appState, game }: { appState: AppState, game: GameState }) {
                 <div className='flex justify-center w-full h-full'>
                     <div id="halftime-adjustments-mask" className='overflow-hidden' style={{ marginTop: 550 }}>
                         <TopBar />
-                        <ContentArea appState={appState} game={game} />
+                        <ContentArea appState={appState} game={game} props={props} />
                     </div>
                 </div>
             </AnimationContainer>
@@ -59,15 +68,15 @@ function MainArea({ appState, game }: { appState: AppState, game: GameState }) {
     );
 }
 
-function ContentArea({ appState, game }: { appState: AppState, game: GameState }) {
+function ContentArea({ appState, game, props }: { appState: AppState, game: GameState, props: HalftimeAdjustmentsProps }) {
     return (
         <div id="content-area-mask" className='overflow-hidden'>
             <Rect id='content-area' width={1500} height={300} color='#131313' className='text-white flex'>
                 <TeamBox team={appState.awayTeam} game={game.awayTeam} />
 
                 <Rect width={900} height={300} className='flex flex-col'>
-                    <TeamAdjustmentBox team={appState.awayTeam} isHome={false} />
-                    <TeamAdjustmentBox team={appState.homeTeam} isHome={true} />
+                    <TeamAdjustmentBox team={appState.awayTeam} isHome={false} text={props.awayAdjustment} />
+                    <TeamAdjustmentBox team={appState.homeTeam} isHome={true} text={props.homeAdjustment} />
                 </Rect>
 
                 <TeamBox team={appState.homeTeam} game={game.homeTeam} />
@@ -76,7 +85,7 @@ function ContentArea({ appState, game }: { appState: AppState, game: GameState }
     );
 }
 
-function TeamAdjustmentBox({ team, isHome }: { team: Team, isHome: boolean }) {
+function TeamAdjustmentBox({ team, isHome, text }: { team: Team, isHome: boolean, text: string }) {
     const align = useMemo(() => isHome ? 'items-end' : '', [isHome]);
     const idPrefix = useMemo(() => isHome ? 'home' : 'away', [isHome]);
 
@@ -84,7 +93,7 @@ function TeamAdjustmentBox({ team, isHome }: { team: Team, isHome: boolean }) {
         <Rect width={900} height={150} color={team.info.primaryColor}
             style={{ color: team.info.primaryTextColor }} className={`flex flex-col py-3 px-5 justify-between ${align}`}>
             <p id={`${idPrefix}-name`} className='text-6xl font-bold'>{team.info.schoolName}</p>
-            <p id={`${idPrefix}-adjustment`} className='text-7xl font-light'>THIS IS A TEAM ADJUSTMENT NOTE</p>
+            <p id={`${idPrefix}-adjustment`} className='text-7xl font-light'>{text}</p>
         </Rect>
     );
 }

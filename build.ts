@@ -13,7 +13,8 @@ const GRAPHICS = [
   '1_basketball_scorebug',
   '2_score_to_break',
   '3_matchup',
-  '4_starting_lineups_lower'
+  '4_starting_lineups_lower',
+  '5_halftime_adjustments'
 ]
 
 GRAPHICS.forEach(async graphicName => {
