@@ -102,3 +102,58 @@ export interface TeamData {
     stats: TeamRecords
     players: Player[]
 }
+
+
+export interface Boxscore {
+    homeTeam: TeamBoxscore
+    awayTeam: TeamBoxscore
+}
+
+export interface Venue {
+    officials: string[]
+}
+
+export interface TeamBoxscore {
+    lineScore: Linescore[]
+    totals: TeamStats
+}
+
+export interface TeamStats {
+    stats: Stats
+}
+
+export interface Linescore {
+    period: number
+    score: number
+}
+
+export interface ShotStats {
+    made: number
+    attempted: number
+    percentage: number
+    percentageDisplay: number
+}
+
+export interface ReboundStats {
+    offensive: number
+    defensive: number
+    total: number
+}
+
+export interface FoulStats {
+    personal: number
+    team: number
+}
+
+export interface Stats {
+    fieldGoals: ShotStats
+    threePointers: ShotStats
+    freeThrows: ShotStats
+    rebounds: ReboundStats
+    fouls: FoulStats
+    blocks: number
+    steals: number
+    assists: number
+    turnovers: number
+    minutes: number
+}

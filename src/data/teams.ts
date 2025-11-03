@@ -1,5 +1,5 @@
 import useSWR from "swr"
-import type { TeamData, AppState, CurrentGameState, GameState } from "./models";
+import type { TeamData, AppState, CurrentGameState, GameState, Boxscore } from "./models";
 
 const API_BASE_URL = "http://localhost:5069"
 
@@ -26,5 +26,10 @@ export function currentGameState() {
 export function useTeamData(home: boolean) {
     const url = home ? '/api/state/homeTeam' : '/api/state/awayTeam';
     const { data, error } = useSWR<TeamData>(url, fetcher);
+    return data;
+}
+
+export function useBoxscore() {
+    const { data, error } = useSWR<Boxscore>('/api/boxscore', fetcher);
     return data;
 }

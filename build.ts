@@ -14,7 +14,8 @@ const GRAPHICS = [
   '2_score_to_break',
   '3_matchup',
   '4_starting_lineups_lower',
-  '5_halftime_adjustments'
+  '5_halftime_adjustments',
+  '6_halftime_stats'
 ]
 
 GRAPHICS.forEach(async graphicName => {
