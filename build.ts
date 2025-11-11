@@ -16,10 +16,13 @@ const GRAPHICS = [
   '4_starting_lineups_lower',
   '5_halftime_adjustments',
   '6_halftime_stats',
-  '7_player_to_watch'
+  '7_player_to_watch',
+  '8_talent_lower_third_double',
+  '9_talent_lower_third_single'
 ]
 
 GRAPHICS.forEach(async graphicName => {
+  console.log(`Building ${graphicName}...`);
   await Bun.build({
     plugins: [tailwind],
     outdir: `build/${graphicName}`,
