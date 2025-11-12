@@ -1,3 +1,5 @@
+import type { ScorebugState } from "@/data/models"
+
 export interface BasketballScorebugProps {
     homeTeam: string
     awayTeam: string
@@ -7,6 +9,7 @@ export interface BasketballScorebugData {
     homeTeam: TeamInfo
     awayTeam: TeamInfo
     info: GameInfo
+    scorebug: ScorebugState
 }
 
 export interface GameInfo {
@@ -47,6 +50,16 @@ export function getDefaultProps(): BasketballScorebugData {
             clock: "",
             shotClock: 0,
             period: ""
+        },
+        scorebug: {
+            homeSlider: {
+                playerNumber: 0,
+                playing: false
+            },
+            awaySlider: {
+                playerNumber: 0,
+                playing: false
+            }
         }
     }
 }

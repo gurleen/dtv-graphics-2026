@@ -33,3 +33,9 @@ export function useBoxscore() {
     const { data, error } = useSWR<Boxscore>('/api/boxscore', fetcher);
     return data;
 }
+
+export function usePlayerLinescore(home: boolean, number: string) {
+    const data = useBoxscore();
+    const team = home ? data?.homeTeam : data?.awayTeam;
+    return team?.players.find(x => x.jerseyNumber.toString() == number);
+}

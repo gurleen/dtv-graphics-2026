@@ -18,7 +18,9 @@ const GRAPHICS = [
   '6_halftime_stats',
   '7_player_to_watch',
   '8_talent_lower_third_double',
-  '9_talent_lower_third_single'
+  '9_talent_lower_third_single',
+  '10_player_lower_third',
+  '11_series_history'
 ]
 
 GRAPHICS.forEach(async graphicName => {

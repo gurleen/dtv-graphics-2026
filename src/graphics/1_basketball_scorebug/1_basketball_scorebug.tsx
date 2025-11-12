@@ -1,6 +1,6 @@
 import AnimationContainer from "@/components/animation-container";
 import { Rect, type Gradient } from "@/components/rect";
-import useAnimation from "@/util/use-animation";
+import useAnimation, { useSubAnimation } from "@/util/use-animation";
 import NumberFlow from "@number-flow/react";
 import { useMemo, useRef } from "react";
 import * as ReactDOM from 'react-dom/client';
@@ -9,8 +9,10 @@ import { useGSAP } from "@gsap/react";
 import FadeContainer from "@/components/fade-container";
 import { type BasketballScorebugData, type GameInfo, type TeamInfo } from "./props";
 import { Color } from "color-core";
-import { useAppState } from "@/data/teams";
+import { useAppState, usePlayerLinescore, useTeamData } from "@/data/teams";
 import { useGameState } from "@/util/use-live-stats-manager";
+import type { Player, PlayerStats, SliderState } from "@/data/models";
+import { FadeText } from "@/components/fade-text";
 
 
 const sponsorLogo = "https://images.dragonstv.io/sponsors/Independence.png";
@@ -52,7 +54,8 @@ function getTeams(): BasketballScorebugData | undefined {
             clock: liveData.clockDisplay,
             period: liveData.periodDisplay,
             shotClock: liveData.shotClock
-        }
+        },
+        scorebug: liveData.scorebugState
     }
 }
 
@@ -71,10 +74,12 @@ function BasketballScorebug({ props }: { props: BasketballScorebugData }) {
 
     return (
         <>
-            {props && <div ref={container} style={{ fontFamily: 'Inter' }}>
+            {props && <div ref={container} style={{ fontFamily: 'Zuume' }}>
                 <AnimationContainer debug={true}>
-                    <div className="flex w-full h-full justify-center" style={{marginTop: 900}}>
-                        <div id="scorebug">
+                    <div className="flex w-full h-full justify-around" style={{ marginTop: 900 }}>
+                        <TeamSliderContainer state={props.scorebug.awaySlider} isHome={false} teamInfo={props.awayTeam} />
+                        <div id="scorebug flex flex-col items-center" style={{ marginTop: -45 }}>
+                            <TextSlider props={props} />
                             <div id="main-bar" className="flex z-10 relative">
                                 <TeamBox isHome={false} teamInfo={props.awayTeam} />
                                 <InfoBox gameInfo={props.info} />
@@ -82,10 +87,113 @@ function BasketballScorebug({ props }: { props: BasketballScorebugData }) {
                             </div>
                             <SubBar props={props} />
                         </div>
+                        <TeamSliderContainer state={props.scorebug.homeSlider} isHome={true} teamInfo={props.homeTeam} />
                     </div>
                 </AnimationContainer>
             </div>}
         </>
+    );
+}
+
+function textSliderAnimation(timeline: gsap.core.Timeline) {
+    timeline
+        .from("#slider", { y: 100, duration: 0.3, ease: 'power3.out' })
+        .from("#title", { x: -100, opacity: 0, duration: 0.3, ease: 'power3.out' }, "<0.1")
+        .from("#subtitle", { x: -200, opacity: 0, duration: 0.3, ease: 'power3.out' }, "<0.1")
+        .addPause()
+        .to("#slider", { y: 100, duration: 0.3, ease: 'power3.out' })
+}
+
+function TextSlider({ props }: { props: BasketballScorebugData }) {
+    const sliderProps = props.scorebug.textSliderState;
+    const container = useSubAnimation(textSliderAnimation, sliderProps.playing);
+
+    return (
+        <div ref={container} className="overflow-hidden">
+            <Rect id="slider" width={851} height={45} className="flex items-center gap-2 text-white text-3xl" style={{ backgroundColor: 'rgba(19, 19, 19, 0.95)' }}>
+                <Rect height={45} color="#131313" className="flex justify-center items-center py-2 px-4 opacity-100 overflow-hidden" style={{ transition: 'width 1s ease-in-out' }}>
+                    <FadeText id="title" className="font-bold" text={sliderProps.title} />
+                </Rect>
+                <div className="overflow-hidden">
+                    <FadeText id="subtitle" text={sliderProps.subtitle} />
+                </div>
+            </Rect>
+        </div>
+    );
+}
+
+function teamSliderAnimation(isHome: boolean) {
+    const sliderDirection = isHome ? -700 : 700;
+    const textDirection = isHome ? -100 : 100;
+    return (timeline: gsap.core.Timeline) => {
+        timeline
+            .from("#slider", { x: sliderDirection, duration: 0.3, ease: 'power3.out' })
+            .from("#name", { x: textDirection, opacity: 0, duration: 0.3, ease: 'power3.out' }, "<0.1")
+            .from("#subtext", { x: textDirection, opacity: 0, duration: 0.3, ease: 'power3.out' }, "<0.1")
+            .from("#stats", { x: textDirection, opacity: 0, duration: 0.3, ease: 'power3.out' }, "<0.1")
+            .addPause()
+            .to("#slider", { opacity: 0, duration: 0.3, ease: 'power3.out' })
+    }
+}
+
+function TeamSliderContainer({ state, isHome, teamInfo }: { state: SliderState, isHome: boolean, teamInfo: TeamInfo }) {
+    const team = useTeamData(isHome);
+    const player = team?.players.find(x => x.jerseyNumber == state.playerNumber.toString());
+    const line = usePlayerLinescore(isHome, state.playerNumber.toString());
+
+    if (!player || !line) {
+        return (
+            <Rect width={500} />
+        );
+    }
+    else {
+        return (
+            <TeamSlider player={player} playing={state.playing} teamInfo={teamInfo} isHome={isHome} line={line} />
+        );
+    }
+
+}
+
+function playerPoints(stats: PlayerStats) {
+    return (3 * stats.totals.threePointers.made) + (2 * stats.totals.fieldGoals.made) + stats.totals.freeThrows.made;
+}
+
+function TeamSlider({ player, playing, teamInfo, isHome, line }: { player: Player, playing: boolean, teamInfo: TeamInfo, isHome: boolean, line: PlayerStats }) {
+    const container = useSubAnimation(teamSliderAnimation(isHome), playing);
+    const bgGradient = useMemo(() => getBgGradient(teamInfo.color), [teamInfo]);
+    const textAlign = isHome ? "" : "text-right";
+    const rowAlign = isHome ? "" : "justify-end";
+
+    const points = useMemo(() => playerPoints(line), [line]);
+
+    return (
+        <div className="overflow-x-hidden" ref={container} style={{ fontFamily: 'Zuume' }}>
+            <Rect id="slider" width={500} height={80} gradient={bgGradient} className={`text-white p-3 flex justify-between items-center ${flexReverseForHome(!isHome)}`}>
+                <div className={`${textAlign}`}>
+                    <p id="name" className="text-4xl leading-8">{player.firstName.toUpperCase()} <span className="font-bold">{player.lastName.toUpperCase()}</span></p>
+                    <div id="subtext" className={`text-3xl flex gap-2 ${rowAlign}`}>
+                        <span>{player.position}</span>
+                        <span>•</span>
+                        <span>{player.experience}</span>
+                        <span>•</span>
+                        <span>#{player.jerseyNumber}</span>
+                    </div>
+                </div>
+                <div id="stats" className="text-5xl flex gap-3 font-bold">
+                    <StatText statName="PTS" amount={points} />
+                    <StatText statName="REB" amount={line.totals.rebounds.total} />
+                    <StatText statName="AST" amount={line.totals.assists} />
+                </div>
+            </Rect>
+        </div>
+    );
+}
+
+function StatText({ statName, amount }: { statName: string, amount: number }) {
+    if (amount == 0) return (<></>);
+
+    return (
+        <p>{amount} <span className="font-normal">{statName}</span></p>
     );
 }
 
@@ -102,13 +210,13 @@ function TeamLogoLayer({ src, isHome }: { src: string, isHome: boolean }) {
 
 function TeamAbbreviation({ abbr }: { abbr: string }) {
     return (
-        <p className="text-white font-extrabold text-4xl">{abbr}</p>
+        <p className="text-white font-semibold text-5xl">{abbr}</p>
     );
 }
 
 function TeamScore({ score }: { score: number }) {
     return (
-        <NumberFlow className="text-white font-black text-5xl tabular-nums" value={score} />
+        <NumberFlow className="text-white font-bold text-6xl tabular-nums" value={score} />
     );
 }
 
@@ -147,7 +255,7 @@ function InfoBox({ gameInfo }: { gameInfo: GameInfo }) {
     const getShotClockCss = (shotClockVal: number) => `font-extrabold text-3xl max-w-full tabular-nums ${getShotClockColor(shotClockVal)}`;
 
     return (
-        <Rect id="info-bg" width={357} height={80} gradient={bgGradient} className="flex justify-between items-center">
+        <Rect id="info-bg" width={357} height={80} gradient={bgGradient} className="flex justify-between items-center" style={{ fontFamily: 'Inter' }}>
             <Rect width={99} height={56} className="flex items-center justify-around">
                 <p className="text-white font-extrabold text-3xl tabular-nums">{gameInfo.period}</p>
             </Rect>

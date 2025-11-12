@@ -1,6 +1,7 @@
 import AnimationContainer from '@/components/animation-container';
 import { Rect } from '@/components/rect';
-import { useAppState, type AppState, type Team } from '@/data/teams';
+import type { AppState, Team } from '@/data/models';
+import { useAppState } from '@/data/teams';
 import useAnimation from '@/util/use-animation';
 import { useMemo } from 'react';
 import * as ReactDOM from 'react-dom/client';

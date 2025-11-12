@@ -1,0 +1,159 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Player Lower Third</title>
+    <link rel="stylesheet" href="tailwindcss" />
+    <link rel="stylesheet" href="../global.css" />
+    <script src="../../util/emitter.ts" type="module"></script>
+    <script src="10_player_lower_third.tsx" type="module"></script>
+    <script>
+        window.SPXGCTemplateDefinition = {
+            "description": "Player To Watch",
+            "playserver": "OVERLAY",
+            "playchannel": "1",
+            "playlayer": "7",
+            "webplayout": "7",
+            "steps": "1",
+            "out": "manual",
+            "uicolor": "2",
+            "dataformat": "json",
+            "DataFields": [
+                {
+                    "field": "isHome",
+                    "ftype": "checkbox",
+                    "title": "Home Team?",
+                    "value": "1",
+                },
+                {
+                    "field": "playerNumber",
+                    "ftype": "textfield",
+                    "title": "Player Number",
+                    "value": "22"
+                },
+                {
+                    "field": "lthType",
+                    "ftype": "dropdown",
+                    "title": "Lower Third Type",
+                    "items": [
+                        {"text": "Text", "value": "text"},
+                        {"text": "Stats", "value": "stats"}
+                    ]
+                },
+                {
+                    "ftype": "spacer"
+                },
+                {
+                    "field": "text",
+                    "ftype": "textfield",
+                    "title": "Text",
+                    "value": "THIS IS A SAMPLE LINE OF TEXT"
+                },
+                {
+                    "ftype": "spacer"
+                },
+                {
+                    "field": "stat1",
+                    "ftype": "dropdown",
+                    "title": "Stat 1",
+                    "items": [
+                        {"text": "", "value": "NONE"},
+                        {"text": "PTS", "value": "PTS"},
+                        {"text": "REB", "value": "REB"},
+                        {"text": "AST", "value": "AST"},
+                        {"text": "STL", "value": "STL"},
+                        {"text": "BLK", "value": "BLK"},
+                        {"text": "FG", "value": "FG"},
+                        {"text": "FG%", "value": "FG%"},
+                        {"text": "3FG", "value": "3FG"},
+                        {"text": "3FG%", "value": "3FG%"},
+                        {"text": "FT", "value": "FT"},
+                        {"text": "FT%", "value": "FT%"},
+                    ]
+                },
+                {
+                    "field": "stat2",
+                    "ftype": "dropdown",
+                    "title": "Stat 2",
+                    "items": [
+                        {"text": "", "value": "NONE"},
+                        {"text": "PTS", "value": "PTS"},
+                        {"text": "REB", "value": "REB"},
+                        {"text": "AST", "value": "AST"},
+                        {"text": "STL", "value": "STL"},
+                        {"text": "BLK", "value": "BLK"},
+                        {"text": "FG", "value": "FG"},
+                        {"text": "FG%", "value": "FG%"},
+                        {"text": "3FG", "value": "3FG"},
+                        {"text": "3FG%", "value": "3FG%"},
+                        {"text": "FT", "value": "FT"},
+                        {"text": "FT%", "value": "FT%"},
+                    ]
+                },
+                {
+                    "field": "stat3",
+                    "ftype": "dropdown",
+                    "title": "Stat 3",
+                    "items": [
+                        {"text": "", "value": "NONE"},
+                        {"text": "PTS", "value": "PTS"},
+                        {"text": "REB", "value": "REB"},
+                        {"text": "AST", "value": "AST"},
+                        {"text": "STL", "value": "STL"},
+                        {"text": "BLK", "value": "BLK"},
+                        {"text": "FG", "value": "FG"},
+                        {"text": "FG%", "value": "FG%"},
+                        {"text": "3FG", "value": "3FG"},
+                        {"text": "3FG%", "value": "3FG%"},
+                        {"text": "FT", "value": "FT"},
+                        {"text": "FT%", "value": "FT%"},
+                    ]
+                },
+                {
+                    "field": "stat4",
+                    "ftype": "dropdown",
+                    "title": "Stat 4",
+                    "items": [
+                        {"text": "", "value": "NONE"},
+                        {"text": "PTS", "value": "PTS"},
+                        {"text": "REB", "value": "REB"},
+                        {"text": "AST", "value": "AST"},
+                        {"text": "STL", "value": "STL"},
+                        {"text": "BLK", "value": "BLK"},
+                        {"text": "FG", "value": "FG"},
+                        {"text": "FG%", "value": "FG%"},
+                        {"text": "3FG", "value": "3FG"},
+                        {"text": "3FG%", "value": "3FG%"},
+                        {"text": "FT", "value": "FT"},
+                        {"text": "FT%", "value": "FT%"},
+                    ]
+                },
+                {
+                    "field": "stat5",
+                    "ftype": "dropdown",
+                    "title": "Stat 5",
+                    "items": [
+                        {"text": "", "value": "NONE"},
+                        {"text": "PTS", "value": "PTS"},
+                        {"text": "REB", "value": "REB"},
+                        {"text": "AST", "value": "AST"},
+                        {"text": "STL", "value": "STL"},
+                        {"text": "BLK", "value": "BLK"},
+                        {"text": "FG", "value": "FG"},
+                        {"text": "FG%", "value": "FG%"},
+                        {"text": "3FG", "value": "3FG"},
+                        {"text": "3FG%", "value": "3FG%"},
+                        {"text": "FT", "value": "FT"},
+                        {"text": "FT%", "value": "FT%"},
+                    ]
+                }
+            ]
+        };
+    </script>
+</head>
+
+<body>
+    <div id="root"></div>
+</body>
+
+</html>

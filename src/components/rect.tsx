@@ -21,6 +21,7 @@ export type RectProps = {
 };
 
 export function ensureHexColor(rawColor: string): HexColor {
+  if(rawColor.startsWith("rgba")) return rawColor as HexColor;
   return (rawColor.startsWith("#") ? rawColor : `#${rawColor}`) as HexColor;
 }
 

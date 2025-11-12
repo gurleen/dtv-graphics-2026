@@ -1,6 +1,6 @@
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { EventBus } from "./emitter";
 
 gsap.registerPlugin(useGSAP);
@@ -31,6 +31,25 @@ export default function useAnimation(animFunc: AnimationFunc) {
     EventBus.on("stop", () => {
         tl.current?.play();
     });
+
+    return container;
+}
+
+export function useSubAnimation(animFunc: AnimationFunc, playing: boolean) {
+    const container = useRef(null);
+    const tl = useRef<gsap.core.Timeline | null>(null);
+    const [isPlaying, setIsPlaying] = useState<boolean>(false);
+
+    useGSAP(() => {
+        tl.current = gsap
+            .timeline({ onComplete: () => { tl.current?.seek(0).pause(); }, paused: true});
+        animFunc(tl.current);
+    }, { scope: container });
+
+    useEffect(() => {
+        if(isPlaying != playing) { tl.current?.play(); }
+        setIsPlaying(playing);
+    })
 
     return container;
 }

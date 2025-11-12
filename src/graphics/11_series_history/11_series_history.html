@@ -1,0 +1,124 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Series History</title>
+    <link rel="stylesheet" href="tailwindcss" />
+    <link rel="stylesheet" href="../global.css" />
+    <script src="../../util/emitter.ts" type="module"></script>
+    <script src="11_series_history.tsx" type="module"></script>
+    <script>
+        window.SPXGCTemplateDefinition = {
+            "description": "Player To Watch",
+            "playserver": "OVERLAY",
+            "playchannel": "1",
+            "playlayer": "7",
+            "webplayout": "7",
+            "steps": "1",
+            "out": "manual",
+            "uicolor": "2",
+            "dataformat": "json",
+            "DataFields": [
+                {
+                    "field": "totalGames",
+                    "ftype": "textfield",
+                    "title": "Total Games",
+                    "value": "14"
+                },
+                {
+                    "field": "firstYearPlayed",
+                    "ftype": "textfield",
+                    "title": "First Year Played",
+                    "value": "1972"
+                },
+                {
+                    "field": "homeWins",
+                    "ftype": "textfield",
+                    "title": "Home Wins",
+                    "value": "7"
+                },
+                {
+                    "field": "awayWins",
+                    "ftype": "textfield",
+                    "title": "Away Wins",
+                    "value": "7"
+                },
+                {
+                    "field": "homeDacWins",
+                    "ftype": "textfield",
+                    "title": "Home DAC Wins",
+                    "value": "9"
+                },
+                {
+                    "field": "awayDacWins",
+                    "ftype": "textfield",
+                    "title": "Away DAC Wins",
+                    "value": "2"
+                },
+                {
+                    "field": "homeLast5",
+                    "ftype": "textfield",
+                    "title": "Home Last 5",
+                    "value": "5"
+                },
+                {
+                    "field": "awayLast5",
+                    "ftype": "textfield",
+                    "title": "Away Last 5",
+                    "value": "5"
+                },
+                {
+                    "field": "homeStreak",
+                    "ftype": "textfield",
+                    "title": "Home Streak",
+                    "value": "L3"
+                },
+                {
+                    "field": "lastGameResult",
+                    "ftype": "dropdown",
+                    "title": "Last Game Result",
+                    "items": [
+                        {"text": "Win", "value": "W"},
+                        {"text": "Loss", "value": "L"}
+                    ]
+                },
+                {
+                    "field": "lastGameHomeScore",
+                    "ftype": "textfield",
+                    "title": "Last Game Drexel Score",
+                    "value": "49"
+                },
+                {
+                    "field": "lastGameAwayScore",
+                    "ftype": "textfield",
+                    "title": "Last Game Away Team Score",
+                    "value": "53"
+                },
+                {
+                    "field": "lastGameDate",
+                    "ftype": "textfield",
+                    "title": "Last Game Date (MMM DD, YYYY)",
+                    "value": "DEC 20, 2019"
+                },
+                {
+                    "field": "lastGameWasAtHome",
+                    "ftype": "checkbox",
+                    "title": "Last Game At Home",
+                    "value": "1"
+                },
+                {
+                    "field": "note",
+                    "ftype": "textarea",
+                    "title": "Note",
+                    "value": "THIS IS COACH MALLON'S FIRST GAME AGAINST THE QUAKERS AS HEAD COACH"
+                },
+            ]
+        };
+    </script>
+</head>
+
+<body>
+    <div id="root"></div>
+</body>
+
+</html>

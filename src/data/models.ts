@@ -21,6 +21,24 @@ export interface GameState {
     periodDisplay: string
     homeTeam: TeamGameState
     awayTeam: TeamGameState
+    scorebugState: ScorebugState
+}
+
+export interface ScorebugState {
+    homeSlider: SliderState
+    awaySlider: SliderState
+    textSliderState: TextSliderState
+}
+
+export interface SliderState {
+    playerNumber: number
+    playing: boolean
+}
+
+export interface TextSliderState {
+    title: string
+    subtitle: string
+    playing: boolean
 }
 
 export interface CurrentGameState {
@@ -115,7 +133,8 @@ export interface Venue {
 
 export interface TeamBoxscore {
     lineScore: Linescore[]
-    totals: TeamStats
+    totals: TeamStats,
+    players: PlayerStats[]
 }
 
 export interface TeamStats {
@@ -156,4 +175,12 @@ export interface Stats {
     assists: number
     turnovers: number
     minutes: number
+}
+
+export interface PlayerStats {
+    jerseyNumber: number
+    gamesPlayed: number
+    gamesStarted: number
+    isOnCourt: boolean
+    totals: Stats
 }
