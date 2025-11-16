@@ -74,11 +74,11 @@ function MainArea({ team, teamData, props }: { team: Team, teamData: TeamData, p
                         <Rect height={140} width={1920} className='flex' style={{ overflow: 'visible' }}>
                             <TeamBox team={team} />
                             <Rect width={920} height={140} color='#D8D8D8' className='flex anim-group-1' style={{ overflow: 'visible' }}>
-                                {player1 && <PlayerBox player={player1} team={team} sport={Sport.MensBasketball} />}
-                                {player2 && <PlayerBox player={player2} team={team} sport={Sport.MensBasketball} />}
-                                {player3 && <PlayerBox player={player3} team={team} sport={Sport.MensBasketball} />}
-                                {player4 && <PlayerBox player={player4} team={team} sport={Sport.MensBasketball} />}
-                                {player5 && <PlayerBox player={player5} team={team} sport={Sport.MensBasketball} />}
+                                {player1 && <PlayerBox player={player1} team={team} sport={Sport.WomensBasketball} />}
+                                {player2 && <PlayerBox player={player2} team={team} sport={Sport.WomensBasketball} />}
+                                {player3 && <PlayerBox player={player3} team={team} sport={Sport.WomensBasketball} />}
+                                {player4 && <PlayerBox player={player4} team={team} sport={Sport.WomensBasketball} />}
+                                {player5 && <PlayerBox player={player5} team={team} sport={Sport.WomensBasketball} />}
                             </Rect>
                             <SponsorBar />
                         </Rect>

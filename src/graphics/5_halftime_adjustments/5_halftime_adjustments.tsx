@@ -129,7 +129,7 @@ function TopBar() {
             <Rect id="top-bar" width={1500} height={150} color='#F0E6C8' className='flex items-center justify-between'>
                 <div className='flex flex-col ps-8'>
                     <p className='text-7xl font-bold'>HALFTIME ADJUSTMENTS</p>
-                    <p className='text-5xl font-light'>PRESENTED BY ROTHMAN ORTHOPEDICS</p>
+                    <p className='text-5xl font-light'>PRESENTED BY ROTHMAN ORTHOPAEDICS</p>
                 </div>
 
                 <Rect width={250} height={150} className='p-7 flex items-center justify-center'>
