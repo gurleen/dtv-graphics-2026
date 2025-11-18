@@ -311,7 +311,7 @@ function BonusText({ active }: { active: boolean }) {
 function TeamSubBar({ isHome, timeouts, bonus }: { isHome: boolean, timeouts: number, bonus: boolean }) {
     return (
         <Rect width={247} height={35} className={`flex items-center px-3 justify-between ${flexReverseForHome(isHome)}`}>
-            <div className="flex gap-2">
+            <div className={`flex ${flexReverseForHome(isHome)} gap-2`}>
                 <TimeoutCircle active={timeouts > 0} />
                 <TimeoutCircle active={timeouts > 1} />
                 <TimeoutCircle active={timeouts > 2} />
