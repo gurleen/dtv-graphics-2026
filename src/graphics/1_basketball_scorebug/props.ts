@@ -10,6 +10,8 @@ export interface BasketballScorebugData {
     awayTeam: TeamInfo
     info: GameInfo
     scorebug: ScorebugState
+    infoBoxCovered: boolean
+    infoBoxText: string
 }
 
 export interface GameInfo {
@@ -59,7 +61,14 @@ export function getDefaultProps(): BasketballScorebugData {
             awaySlider: {
                 playerNumber: 0,
                 playing: false
+            },
+            textSliderState: {
+                title: "",
+                subtitle: "",
+                playing: false
             }
-        }
+        },
+        infoBoxCovered: false,
+        infoBoxText: "FINAL"
     }
 }

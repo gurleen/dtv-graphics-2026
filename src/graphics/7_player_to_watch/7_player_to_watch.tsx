@@ -1,4 +1,5 @@
 import AnimationContainer from '@/components/animation-container';
+import MarkdownText from '@/components/markdown-text';
 import { Rect } from '@/components/rect';
 import { type AppState, type TeamData } from '@/data/models';
 import { useAppState, useTeamData } from '@/data/teams';
@@ -34,7 +35,7 @@ function animation(timeline: gsap.core.Timeline) {
 
 function getTestProps(): Props {
     return {
-        text: 'THIS IS A STAT LINE ABOUT PLAYER',
+        text: '**13** PTS, **4** REB, **2** AST, **2** STL\nIN LOSS TO **SYRACUSE** (11/15)',
         playerNumber: '22',
         isHome: "1"
     }
@@ -46,8 +47,8 @@ function decodeText(text: string): string {
 
 function PageRoot() {
     const appState = useAppState();
-    const props = useProps<Props>();
-    // const props = getTestProps();
+    // const props = useProps<Props>();
+    const props = getTestProps();
 
     return (
         <>
@@ -87,7 +88,9 @@ function PlayerToWatch({ gfx, isHome, teamData, playerNumber, text }: Data) {
                     </Rect>
 
                     <Rect width={920} height={145} color='#D8D8D8' className='flex items-center justify-center text-center p-8'>
-                        <p className='text-6xl whitespace-pre-wrap'>{decodeText(text)}</p>
+                        <p className='text-6xl whitespace-pre-wrap'>
+                            <MarkdownText text={decodeText(text)} />
+                        </p>
                     </Rect>
 
                     <Rect width={500} height={145} color='#D8D8D8'>

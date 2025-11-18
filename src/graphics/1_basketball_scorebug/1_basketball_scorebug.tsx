@@ -13,6 +13,8 @@ import { useAppState, usePlayerLinescore, useTeamData } from "@/data/teams";
 import { useGameState } from "@/util/use-live-stats-manager";
 import type { Player, PlayerStats, SliderState } from "@/data/models";
 import { FadeText } from "@/components/fade-text";
+import { ZLayers } from "@/util/layers";
+import useProps from "@/util/use-props";
 
 
 const sponsorLogo = "https://images.dragonstv.io/sponsors/Independence.png";
@@ -27,11 +29,18 @@ function animation(timeline: gsap.core.Timeline) {
         .to(".anim-container", { opacity: 0, duration: 0.5, ease: "power3.inOut" });
 }
 
+interface Props {
+    infoBoxCovered: string
+    infoBoxText: string
+}
+
 function getTeams(): BasketballScorebugData | undefined {
     const appState = useAppState();
     const liveData = useGameState();
+    const props = useProps<Props>();
+    // const props = { infoBoxCovered: false, infoBoxText: 'FINAL' }
 
-    if (!appState || !liveData) return undefined;
+    if (!appState || !liveData || !props) return undefined;
 
     return {
         homeTeam: {
@@ -55,7 +64,9 @@ function getTeams(): BasketballScorebugData | undefined {
             period: liveData.periodDisplay,
             shotClock: liveData.shotClock
         },
-        scorebug: liveData.scorebugState
+        scorebug: liveData.scorebugState,
+        infoBoxCovered: props.infoBoxCovered == "1",
+        infoBoxText: props.infoBoxText
     }
 }
 
@@ -82,7 +93,10 @@ function BasketballScorebug({ props }: { props: BasketballScorebugData }) {
                             <TextSlider props={props} />
                             <div id="main-bar" className="flex z-10 relative">
                                 <TeamBox isHome={false} teamInfo={props.awayTeam} />
-                                <InfoBox gameInfo={props.info} />
+                                <ZLayers>
+                                    <InfoBox gameInfo={props.info} />
+                                    <InfoBoxCover showing={props.infoBoxCovered} text={props.infoBoxText} />
+                                </ZLayers>
                                 <TeamBox isHome={true} teamInfo={props.homeTeam} />
                             </div>
                             <SubBar props={props} />
@@ -269,6 +283,26 @@ function InfoBox({ gameInfo }: { gameInfo: GameInfo }) {
                 <p className={getShotClockCss(gameInfo.shotClock)}>{gameInfo.shotClock}</p>
             </Rect>
         </Rect>
+    );
+}
+
+function infoBoxCoverAnimation(timeline: gsap.core.Timeline) {
+    timeline
+        .from("#info-box-cover", { opacity: 0, duration: 0.3, ease: 'circ.inOut' })
+        .addPause()
+        .to("#info-box-cover", { opacity: 0, duration: 0.3, ease: 'circ.inOut' })
+}
+
+function InfoBoxCover({ showing, text }: {showing: boolean, text: string}) {
+    const bgGradient = useMemo(() => getBgGradient("#1a1a1a"), []);
+    const container = useSubAnimation(infoBoxCoverAnimation, showing);
+
+    return (
+        <div ref={container}>
+            <Rect id="info-box-cover" width={357} height={80} gradient={bgGradient} className="flex justify-center items-center">
+                <p className="text-white font-bold text-6xl">{text}</p>
+            </Rect>
+        </div>
     );
 }
 
