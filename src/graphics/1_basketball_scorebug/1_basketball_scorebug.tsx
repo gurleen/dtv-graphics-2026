@@ -248,6 +248,7 @@ function InfoBox({ gameInfo }: { gameInfo: GameInfo }) {
     const bgGradient = useMemo(() => getBgGradient("#1a1a1a"), []);
 
     function getShotClockColor(shotClock: number): string {
+        if (shotClock == 0) return "invisible";
         if (shotClock < 15 && shotClock > 10) return "text-yellow-500";
         if (shotClock <= 10) return "text-red-500";
         return "text-white";
