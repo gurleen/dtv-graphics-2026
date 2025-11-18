@@ -5,6 +5,7 @@ import { useAppState, useTeamData } from '@/data/teams';
 import { ZLayers } from '@/util/layers';
 import useAnimation from '@/util/use-animation';
 import useProps from '@/util/use-props';
+import he from 'he';
 import { useMemo } from 'react';
 import * as ReactDOM from 'react-dom/client';
 
@@ -37,6 +38,10 @@ function getTestProps(): Props {
         playerNumber: '22',
         isHome: "1"
     }
+}
+
+function decodeText(text: string): string {
+    return he.decode(text).replaceAll("<br>", "\n");
 }
 
 function PageRoot() {
@@ -82,7 +87,7 @@ function PlayerToWatch({ gfx, isHome, teamData, playerNumber, text }: Data) {
                     </Rect>
 
                     <Rect width={920} height={145} color='#D8D8D8' className='flex items-center justify-center text-center p-8'>
-                        <p className='text-6xl whitespace-pre-line'>{text}</p>
+                        <p className='text-6xl whitespace-pre-wrap'>{decodeText(text)}</p>
                     </Rect>
 
                     <Rect width={500} height={145} color='#D8D8D8'>

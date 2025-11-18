@@ -8,6 +8,8 @@ import { Color } from 'color-core';
 import { match } from 'ts-pattern';
 import { createContext, useContext, useMemo } from 'react';
 import * as ReactDOM from 'react-dom/client';
+import Markdown from 'react-markdown';
+import MarkdownText from '@/components/markdown-text';
 
 type StatsOptions = "NONE" | "PTS" | "REB" | "AST" | "STL" | "BLK" | "FG" | "FG%" | "3FG" | "3FG%" | "FT" | "FT%"
 
@@ -148,7 +150,7 @@ function TextBox() {
 
     return (
         <div id="subtext" className='text-4xl text-white font-light'>
-            {data.props.text}
+            <MarkdownText text={data.props.text} />
         </div>
     );
 }

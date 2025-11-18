@@ -3,10 +3,15 @@ import { Rect } from '@/components/rect';
 import type { AppState, CurrentGameState, GameState, Team } from '@/data/models';
 import { currentGameState, useAppState } from '@/data/teams';
 import useAnimation from '@/util/use-animation';
+import useProps from '@/util/use-props';
 import { useMemo } from 'react';
 import * as ReactDOM from 'react-dom/client';
 
 const sponsorLogo = "https://images.dragonstv.io/sponsors/Independence.png";
+
+interface Props {
+    period: string
+}
 
 function animation(timeline: gsap.core.Timeline) {
     timeline
@@ -20,15 +25,16 @@ function animation(timeline: gsap.core.Timeline) {
 function PageRoot() {
     const appState = useAppState();
     const gameState = currentGameState();
+    const props = useProps<Props>();
 
     return  (
         <>
-            {gameState && appState && <ScoreToBreak state={gameState} gfx={appState} />}
+            {gameState && appState && props && <ScoreToBreak state={gameState} gfx={appState} props={props} />}
         </>
     );
 }
 
-function ScoreToBreak({ state, gfx }: {state: GameState, gfx: AppState}) {
+function ScoreToBreak({ state, gfx, props }: {state: GameState, gfx: AppState, props: Props}) {
     const container = useAnimation(animation);
 
     return (
@@ -44,7 +50,7 @@ function ScoreToBreak({ state, gfx }: {state: GameState, gfx: AppState}) {
                             <TeamBox team={gfx.homeTeam} />
                             <ScoreBox score={state.homeTeam.score} isHome={true} />
                         </div>
-                        <BottomBar periodText={state.fullPeriodName} />
+                        <BottomBar periodText={props.period} />
                     </Rect>
                 </div>
             </AnimationContainer>

@@ -5,7 +5,9 @@
   "private": true,
   "scripts": {
     "build": "bun build.ts",
-    "debug": "bun debug.ts"
+    "debug": "bun run-debug.ts",
+    "deploy": "bun deploy.ts",
+    "push": "bun run build && bun run deploy"
   },
   "devDependencies": {
     "@types/bun": "latest"
@@ -27,6 +29,7 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-image-glow": "^1.0.6",
+    "react-markdown": "^10.1.0",
     "swr": "^2.3.6",
     "tailwindcss": "^4.1.14",
     "ts-pattern": "^5.9.0"
