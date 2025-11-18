@@ -21,7 +21,9 @@ const GRAPHICS = [
   '9_talent_lower_third_single',
   '10_player_lower_third',
   '11_series_history',
-  '12_coming_up_next'
+  '12_coming_up_next',
+  '13_coach_lower_third',
+  '14_coach_lower_third_double'
 ]
 
 GRAPHICS.forEach(async graphicName => {

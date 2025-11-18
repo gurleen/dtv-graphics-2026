@@ -47,8 +47,8 @@ function decodeText(text: string): string {
 
 function PageRoot() {
     const appState = useAppState();
-    // const props = useProps<Props>();
-    const props = getTestProps();
+    const props = useProps<Props>();
+    // const props = getTestProps();
 
     return (
         <>

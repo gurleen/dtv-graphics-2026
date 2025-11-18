@@ -12,7 +12,7 @@ declare global {
     }
 }
 
-type AnimationFunc = (timeline: gsap.core.Timeline) => void;
+export type AnimationFunc = (timeline: gsap.core.Timeline) => void;
 
 export default function useAnimation(animFunc: AnimationFunc) {
     const container = useRef(null);
