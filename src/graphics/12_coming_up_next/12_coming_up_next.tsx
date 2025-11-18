@@ -34,11 +34,11 @@ function TalentLowerThirdSingle({ state }: { state: AppState }) {
                 <div className='flex justify-center w-full h-full' id='container' style={{ marginTop: 850 }}>
                     <div className='flex flex-col'>
                         <div className='flex items-center'>
-                            <TeamBox team={state.awayTeam} />
+                            <TeamBox team={state.awayTeam} isRight={false} />
                             <Rect width={300} height={104} color='#000' className='flex justify-center items-center p-10'>
                                 <img src={confLogo} />
                             </Rect>
-                            <TeamBox team={state.homeTeam} />
+                            <TeamBox team={state.homeTeam} isRight={true} />
                         </div>
                         <Rect width={1330} height={40} color='#000' className='text-white flex items-center justify-between px-3 text-3xl'>
                             <p>DASKALAKIS ATHLETIC CENTER</p>
@@ -51,11 +51,12 @@ function TalentLowerThirdSingle({ state }: { state: AppState }) {
     );
 }
 
-function TeamBox({ team }: { team: Team }) {
+function TeamBox({ team, isRight }: { team: Team, isRight: boolean }) {
+    const flexDir = isRight ? "row-reverse" : "row";
     return (
-        <Rect width={515} height={104} color={team.info.primaryColor} className='flex items-center justify-between'>
+        <Rect width={515} height={104} color={team.info.primaryColor} className='flex items-center justify-between px-3' style={{ flexDirection: flexDir }}>
             <Rect width={319}>
-                <img style={{ marginLeft: -50 }} src={team.info.knockoutLogoUrl} />
+                <img src={team.info.knockoutLogoUrl} />
             </Rect>
             <div className='flex flex-col me-2 text-white'>
                 <p className='text-6xl font-bold'>{team.info.schoolName}</p>
