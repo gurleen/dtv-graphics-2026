@@ -25,11 +25,15 @@ export default function useAnimation(animFunc: AnimationFunc) {
     }, { scope: container });
 
     EventBus.on("play", () => {
-        tl.current?.play();
+        if(tl.current?.time() == 0) {
+            tl.current?.play();
+        }
     });
 
     EventBus.on("stop", () => {
-        tl.current?.play();
+        if(tl.current?.time() ?? 0 > 0) {
+            tl.current?.play();
+        }
     });
 
     return container;
