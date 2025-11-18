@@ -97,10 +97,14 @@ function TeamStatsGrid({ box }: {box: Boxscore}) {
 
 function TeamStatsRow({ awayVal, stat, homeVal }: { awayVal: string | number, stat: string, homeVal: string | number }) {
     return (
-        <div className='flex items-center justify-between px-10 text-[69px] tabular-nums'>
-            <p>{awayVal}</p>
-            <p className='font-bold'>{stat}</p>
-            <p>{homeVal}</p>
+        <div className='grid grid-cols-3 px-10 text-[69px] tabular-nums'>
+            <p className='text-left'>{awayVal}</p>
+            <div className='flex items-center justify-center'>
+                <Rect width={100} color='#000'>
+                    <p className='font-bold text-center text-white'>{stat}</p>
+                </Rect>
+            </div>
+            <p className='text-right'>{homeVal}</p>
         </div>
     );
 }
