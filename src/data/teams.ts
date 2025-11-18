@@ -25,7 +25,7 @@ export function currentGameState() {
 
 export function useTeamData(home: boolean) {
     const url = home ? '/api/state/homeTeam' : '/api/state/awayTeam';
-    const { data, error } = useSWR<TeamData>(url, fetcher);
+    const { data, error } = useSWR<TeamData>(url, fetcher, { refreshInterval: 1000 });
     return data;
 }
 
