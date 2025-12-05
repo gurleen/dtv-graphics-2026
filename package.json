@@ -30,6 +30,7 @@
     "react-dom": "^19.2.0",
     "react-image-glow": "^1.0.6",
     "react-markdown": "^10.1.0",
+    "react-timer-hook": "^4.0.5",
     "swr": "^2.3.6",
     "tailwindcss": "^4.1.14",
     "ts-pattern": "^5.9.0"

@@ -184,3 +184,23 @@ export interface PlayerStats {
     isOnCourt: boolean
     totals: Stats
 }
+
+export type TeamSide = "Home" | "Away";
+
+export type Wrestler = {
+  ranking: number;
+  firstName: string;
+  lastName: string;
+};
+
+export type WrestlingScorebugState = {
+  weightClass: string;
+  clock: number;
+  period: number;
+  advantageTime: number;
+  advantageSide: TeamSide;
+  homeWrestler: Wrestler;
+  awayWrestler: Wrestler;
+  homeScore: number;
+  awayScore: number;
+};

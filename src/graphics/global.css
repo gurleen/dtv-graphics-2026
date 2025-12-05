@@ -6,3 +6,9 @@ body {
     overflow: hidden;
     scrollbar-width: none;
 }
+
+.center-x-y {
+    display: flex;
+    justify-content: center;
+    align-items: center;    
+}
