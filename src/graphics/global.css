@@ -12,3 +12,8 @@ body {
     justify-content: center;
     align-items: center;    
 }
+
+.clock-font {
+    font-family: 'DSEG7 Classic';
+    font-weight: 900;
+}

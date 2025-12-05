@@ -9,7 +9,8 @@ await rm(outDir, {
 })
 
 const CONTROLS = [
-  'text-slider'
+  'text-slider',
+  'wrestling'
 ]
 
 CONTROLS.forEach(async controlName => {
@@ -17,7 +18,7 @@ CONTROLS.forEach(async controlName => {
   await Bun.build({
     plugins: [tailwind],
     outdir: `build-controls/${controlName}`,
-    entrypoints: [`src/controls/${controlName}/index.html`, `src/controls/${controlName}/init.js`],
+    entrypoints: [`src/controls/${controlName}/index.html`],
     target: "browser",
     sourcemap: "linked",
     minify: true

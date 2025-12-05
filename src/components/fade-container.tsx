@@ -2,7 +2,7 @@ import { useGSAP } from "@gsap/react";
 import { useRef } from "react";
 import gsap from "gsap";
 
-export default function FadeContainer({visible, children}: {visible: boolean, children: React.ReactNode}) {
+export default function FadeContainer({visible, children, className}: {visible: boolean, children: React.ReactNode, className?: string}) {
     const container = useRef(null);
 
     useGSAP(() => {
@@ -12,7 +12,7 @@ export default function FadeContainer({visible, children}: {visible: boolean, ch
 
     return (
         <div ref={container}>
-            <div className="children">
+            <div className={`children ${className}`}>
                 {children}
             </div>
         </div>

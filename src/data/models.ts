@@ -188,6 +188,7 @@ export interface PlayerStats {
 export type TeamSide = "Home" | "Away";
 
 export type Wrestler = {
+  isRanked: boolean;
   ranking: number;
   firstName: string;
   lastName: string;
