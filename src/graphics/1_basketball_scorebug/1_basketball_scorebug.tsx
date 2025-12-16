@@ -169,7 +169,9 @@ function TeamSliderContainer({ state, isHome, teamInfo }: { state: SliderState, 
 }
 
 function playerPoints(stats: PlayerStats) {
-    return (3 * stats.totals.threePointers.made) + (2 * stats.totals.fieldGoals.made) + stats.totals.freeThrows.made;
+    const threes = stats.totals.threePointers.made;
+    const twos = stats.totals.fieldGoals.made - threes;
+    return (3 * threes) + (2 * twos) + stats.totals.freeThrows.made;
 }
 
 function TeamSlider({ player, playing, teamInfo, isHome, line }: { player: Player, playing: boolean, teamInfo: TeamInfo, isHome: boolean, line: PlayerStats }) {

@@ -79,16 +79,10 @@ function TeamBox({ team, wrestler, score, advantage, advTime }: { team: Team, wr
                         <img style={{ marginTop: -180, marginLeft: -130, scale: 0.4, opacity: 0.1 }} src={team.info.knockoutLogoUrl} />
                     </div>
                     <div className='flex w-full items-center justify-between text-white'>
-                        <div className='text-4xl grid grid-cols-12 ps-3 pt-1'>
-                            <div className='wrestler-ranking col-span-2 text-center'>
-                                <FadeContainer visible={wrestler.isRanked} className={`text-3xl pt-0.5 ${rankingVisiblity}`}>
-                                    <p className='text-3xl'>{wrestler.ranking}</p>
-                                </FadeContainer>
-                            </div>
-                            <div className='wrestler-name col-span-10 flex items-center gap-2 ps-1'>
-                                <FadeText className='font-light' text={wrestler.firstName} />
-                                <FadeText className='font-bold' text={wrestler.lastName} />
-                            </div>
+                        <div className='text-4xl flex ps-3 pt-1'>
+                            <p className={`text-3xl ${rankingVisiblity}`}>{wrestler.ranking}</p>
+                            <FadeText className='ms-1 font-light' text={wrestler.firstName} />
+                            <FadeText className='ms-2 font-bold' text={wrestler.lastName} />
                         </div>
 
                         <Rect width={90} height={60} color={homeColorDarker} className='flex items-center justify-center w-border overflow-hidden'>
