@@ -100,7 +100,7 @@ function SponsorBar() {
     return (
         <div id='sponsor-bar' className='flex justify-center'>
             <Rect height={72} color='#141414' className='flex gap-5 items-center justify-center p-7'>
-                <p className='text-5xl text-white'>DREXEL WRESTLING PRESENTED BY</p>
+                <p className='text-5xl text-white'>DREXEL BASKETBALL PRESENTED BY</p>
                 <img className='mb-1' width={400} src={sponsorLogo} />
             </Rect>
         </div>

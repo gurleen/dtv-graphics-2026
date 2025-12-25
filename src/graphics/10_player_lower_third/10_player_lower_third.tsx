@@ -198,13 +198,16 @@ function fullPosition(position: string) {
     return position;
 }
 
-const totalPoints = (x: PlayerStats) => (3 * x.totals.threePointers.made) + (2 * x.totals.fieldGoals.made)
-    + x.totals.freeThrows.made;
+function playerPoints(stats: PlayerStats) {
+    const threes = stats.totals.threePointers.made;
+    const twos = stats.totals.fieldGoals.made - threes;
+    return (3 * threes) + (2 * twos) + stats.totals.freeThrows.made;
+}
 
 function getStatFromLine(line: PlayerStats, stat: StatsOptions) {
     return match(stat)
         .with("NONE", _ => "")
-        .with("PTS", _ => totalPoints(line))
+        .with("PTS", _ => playerPoints(line))
         .with("REB", _ => line.totals.rebounds.total)
         .with("AST", _ => line.totals.assists)
         .with("STL", _ => line.totals.steals)

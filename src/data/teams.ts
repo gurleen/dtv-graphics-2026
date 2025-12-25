@@ -1,4 +1,5 @@
 import useSWR from "swr"
+import { useState, useEffect } from "react"
 import type { TeamData, AppState, CurrentGameState, GameState, Boxscore } from "./models";
 
 const API_BASE_URL = "http://localhost:5069"
@@ -24,8 +25,24 @@ export function currentGameState() {
 }
 
 export function useTeamData(home: boolean) {
-    const url = home ? '/api/state/homeTeam' : '/api/state/awayTeam';
-    const { data, error } = useSWR<TeamData>(url, fetcher, { refreshInterval: 1000 });
+    const [data, setData] = useState<TeamData | undefined>(undefined);
+    
+    useEffect(() => {
+        const url = home ? '/api/state/homeTeam' : '/api/state/awayTeam';
+        
+        const fetchData = () => {
+            fetch(new URL(url, API_BASE_URL))
+                .then(res => res.json())
+                .then(data => setData(data))
+                .catch(error => console.error(error));
+        };
+        
+        fetchData();
+        const interval = setInterval(fetchData, 500);
+        
+        return () => clearInterval(interval);
+    }, [home]);
+    
     return data;
 }
 

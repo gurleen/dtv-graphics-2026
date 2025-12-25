@@ -50,8 +50,8 @@ function HalftimeAdjustments({ gfx, game, box }: { gfx: AppState, game: GameStat
                                     </Rect>
 
                                     <div className='flex'>
-                                        <TeamScoreBox name={gfx.awayTeam.info.schoolName} score={game.awayTeam.score} />
-                                        <TeamScoreBox name={gfx.homeTeam.info.schoolName} score={game.homeTeam.score} />
+                                        <TeamScoreBox name={gfx.awayTeam.info.abbreviation} score={game.awayTeam.score} />
+                                        <TeamScoreBox name={gfx.homeTeam.info.abbreviation} score={game.homeTeam.score} />
                                     </div>
 
                                     <TeamStatsGrid box={box} />
