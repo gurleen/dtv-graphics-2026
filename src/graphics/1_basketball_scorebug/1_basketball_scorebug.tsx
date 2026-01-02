@@ -15,6 +15,8 @@ import type { Player, PlayerStats, SliderState } from "@/data/models";
 import { FadeText } from "@/components/fade-text";
 import { ZLayers } from "@/util/layers";
 import useProps from "@/util/use-props";
+import { GlobalSettingsProvider } from "@/contexts/GlobalSettingsContext";
+import { ObjectStoreProvider } from "@/contexts/ObjectStoreContext";
 
 
 const sponsorLogo = "https://images.dragonstv.io/sponsors/Independence.png";
@@ -74,9 +76,11 @@ function PageRoot() {
     const props = getTeams();
 
     return (
-        <>
-            {props && <BasketballScorebug props={props} />}
-        </>
+        <GlobalSettingsProvider>
+            <ObjectStoreProvider>
+                {props && <BasketballScorebug props={props} />}
+            </ObjectStoreProvider>
+        </GlobalSettingsProvider>
     );
 }
 
