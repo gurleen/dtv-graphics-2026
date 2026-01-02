@@ -17,7 +17,7 @@ export class TypedLiveDataHubClient {
         this.wrestlingState = TypedLiveDataHubClient.getDefaultWrestlingState();
 
         this.conn = new signalR.HubConnectionBuilder()
-            .withUrl("http://localhost:5000/TypedLiveData")
+            .withUrl("http://localhost:5069/TypedLiveData")
             .withAutomaticReconnect()
             .build();
         this.conn.start();

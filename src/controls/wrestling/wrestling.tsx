@@ -6,6 +6,7 @@ import { HomeRoster } from './homeRoster';
 import { useTimer } from 'react-timer-hook';
 import { useImmer } from "use-immer";
 
+const fontFamily = "Berkeley Mono, Berkeley Mono Variable, monospace";
 
 const SPX_API = "https://gfx.dragonstv.io/api/v1";
 const saveProbablesJson = async (isHome: boolean, probables: Wrestler[]) => {
@@ -64,7 +65,7 @@ function Page() {
     }, [weight]);
 
     return (
-        <div className='p-10 border-collapse' style={{ color: '#009E67', fontFamily: 'Berkeley Mono' }}>
+        <div className='p-10 border-collapse' style={{ color: '#009E67', fontFamily: fontFamily }}>
             <div className='grid grid-cols-10'>
                 <div className='col-span-10 border-2 py-2 px-4'>
                     <div className='flex items-center justify-between'>

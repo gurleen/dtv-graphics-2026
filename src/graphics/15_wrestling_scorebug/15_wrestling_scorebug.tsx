@@ -18,6 +18,7 @@ import { FadeText } from '@/components/fade-text';
 const sponsorLogo = "https://images.dragonstv.io/sponsors/Independence.png";
 
 function animation(timeline: gsap.core.Timeline) {
+    return;
     timeline
         // .delay(0.5)
         .from("#scorebug", { x: -200, opacity: 0, duration: 0.5, ease: "circ.out" })
