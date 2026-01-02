@@ -1,10 +1,9 @@
 import { AvailableStatsSelect, TimerOptionsSearch, type BasketballScorebugState, type TeamBasketballScorebugState } from "@/types/basketball";
-import { useObjectStore } from "@/util/use-object-store";
-import { useEffect } from "react";
 import { NumberInput } from "@/components/NumberInput";
 import { SwitchInput } from "@/components/SwitchInput";
 import Select from 'react-select'
 import type { TeamSide } from "@/data/models";
+import { useBasketballBugState } from "@/hooks/use-basketball-bug-state";
 
 export function BasketballSettingsTab() {
     const { bugState, setBugState } = useBasketballBugState();
@@ -71,27 +70,4 @@ function TeamBugState({ teamBugState, setBugState, side }: TeamBugStateProps) {
             </div>
         </div>
     );
-}
-
-function useBasketballBugState() {
-    const {
-        data,
-        subscribe,
-        unsubscribe,
-        set,
-    } = useObjectStore();
-
-    useEffect(() => {
-        subscribe('basketball-scorebug-state');
-        return () => unsubscribe('basketball-scorebug-state');
-    }, []);
-
-    const bugState = data['basketball-scorebug-state'] as BasketballScorebugState | undefined;
-    const setBugState = (updater: (draft: BasketballScorebugState) => void) => {
-        const draft = { ...bugState! };
-        updater(draft);
-        set('basketball-scorebug-state', draft);
-    }
-
-    return { bugState, setBugState };
 }
