@@ -25,11 +25,21 @@ export const AvailableStats: StatOptions[] = [
     "FT%"
 ];
 
+export type TimerOptions = "LastScore" | "LastFG";
+export const TimerOptionsValues: TimerOptions[] = ["LastScore", "LastFG"];
+export const TimerOptionsSearch = TimerOptionsValues.map(x => ({value: x, label: x}));
+
 export const AvailableStatsSelect = AvailableStats.map(x => ({ value: x, label: x.toString() }));
+
+export interface TeamTimerState {
+    showing: boolean;
+    type: TimerOptions;
+}
 
 export interface TeamBasketballScorebugState {
     timeouts: number;
     bonus: boolean;
+    timer: TeamTimerState;
 }
 
 export interface ComparisonStatState {
