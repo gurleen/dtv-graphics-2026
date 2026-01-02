@@ -199,7 +199,7 @@ export type WrestlingScorebugState = {
   clock: number;
   period: number;
   advantageTime: number;
-  advantageSide: TeamSide;
+  advantageSide: number;
   homeWrestler: Wrestler;
   awayWrestler: Wrestler;
   homeScore: number;
