@@ -23,3 +23,14 @@ export function parseInt(input: string): number {
         return -1;
     }
 }
+
+/**
+ * Checks if a value is neither null nor undefined.
+ * Acts as a type guard to narrow the type.
+ *
+ * @param value - The value to check.
+ * @returns True if the value is not null and not undefined, false otherwise.
+ */
+export function isDefined<T>(value: T): value is NonNullable<T> {
+    return value !== null && value !== undefined;
+}
