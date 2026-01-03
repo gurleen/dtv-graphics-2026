@@ -62,7 +62,7 @@ function TeamBox({team}: {team: Team }) {
     return (
         <Rect width={183} height={168} color={team.info.primaryColor}>
             <div>
-                <img style={{maxWidth: 400, marginLeft: -110, marginTop: -110}} src={team.info.knockoutLogoUrl} />
+                <img style={{maxWidth: 400, marginLeft: -110, marginTop: -110}} src={team.info.knockoutLogoUrl + `?t=${Date.now()}`} />
             </div>
         </Rect>
     );

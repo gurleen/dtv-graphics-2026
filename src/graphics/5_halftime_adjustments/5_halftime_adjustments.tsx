@@ -113,7 +113,7 @@ function TeamBox({ team, game }: { team: Team, game: TeamGameState }) {
                     />
                 </div>
                 <Rect className='flex'>
-                    <img src={team.info.knockoutLogoUrl} style={{ scale: 2.4, opacity: .15 }} />
+                    <img src={team.info.knockoutLogoUrl + `?t=${Date.now()}`} style={{ scale: 2.4, opacity: .15 }} />
                 </Rect>
                 <Rect className='flex w-full h-full justify-center items-center'>
                     <p className='font-bold' style={{ color: team.info.primaryTextColor, fontSize: 175 }}>{game.score}</p>

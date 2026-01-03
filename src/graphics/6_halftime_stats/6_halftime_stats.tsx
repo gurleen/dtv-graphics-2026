@@ -121,7 +121,7 @@ function TeamScoreBox({ name, score }: { name: string, score: number }) {
 function TeamLogoBox({ team }: { team: Team }) {
     return (
         <Rect width={443} height={689} color={team.info.primaryColor} className='flex items-center justify-center'>
-            <img src={team.info.knockoutLogoUrl} style={{ scale: 2 }} />
+            <img src={team.info.knockoutLogoUrl + `?t=${Date.now()}`} style={{ scale: 2 }} />
         </Rect>
     );
 }
