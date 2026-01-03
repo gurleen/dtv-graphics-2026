@@ -219,10 +219,11 @@ function StatText({ statName, amount }: { statName: string, amount: number }) {
 
 function TeamLogoLayer({ src, isHome }: { src: string, isHome: boolean }) {
     const logoHorizPos = isHome ? "right-[-65px]" : "left-[-65px]";
+    const imgSrc = src + `?t=${Date.now()}`; // Cache buster
     return (
         <div className={`team-bg-layer w-full h-full flex ${flexReverseForHome(isHome)} absolute inset-0`}>
             <div className={`top-[-75px] ${logoHorizPos} absolute opacity-15`}>
-                <img className="w-[250px]" src={src} />
+                <img className="w-[250px]" src={imgSrc} />
             </div>
         </div>
     );
