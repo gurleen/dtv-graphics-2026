@@ -25,7 +25,8 @@ const GRAPHICS = [
   '13_coach_lower_third',
   '14_coach_lower_third_double',
   '15_wrestling_scorebug',
-  '16_wrestling_probables'
+  '16_wrestling_probables',
+  '17_conf_standings'
 ]
 
 GRAPHICS.forEach(async graphicName => {
