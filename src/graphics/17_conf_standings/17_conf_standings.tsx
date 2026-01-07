@@ -10,7 +10,7 @@ import { getTeamKnockoutLogo, type TeamInfo } from '@/types/team';
 import { ZLayers } from '@/util/layers';
 
 const confLogo = "https://images.dragonstv.io/sponsors/CAAWhite.png";
-const playingTeams = [2275, 2182];
+const playingTeams = [2097, 2182];
 
 interface PageContextType {
     teams: TeamInfo[];
@@ -49,7 +49,7 @@ function animation(timeline: gsap.core.Timeline) {
 
 function PageRoot() {
     const teams = useTeamData();
-    const { data: records } = useSpxObject<TeamStandingsRecord[]>("basketball", "mbb_records.json");
+    const { data: records } = useSpxObject<TeamStandingsRecord[]>("basketball", "wbb_records.json");
 
     if (!isDefined(records) || !isDefined(teams)) { return null; }
 

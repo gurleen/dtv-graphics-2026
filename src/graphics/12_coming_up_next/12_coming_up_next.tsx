@@ -56,7 +56,7 @@ function TeamBox({ team, isRight }: { team: Team, isRight: boolean }) {
     return (
         <Rect width={515} height={104} color={team.info.primaryColor} className='flex items-center justify-between px-3' style={{ flexDirection: flexDir }}>
             <Rect width={319}>
-                <img src={team.info.knockoutLogoUrl} />
+                <img src={team.info.knockoutLogoUrl + `?t=${Date.now()}`} />
             </Rect>
             <div className='flex flex-col me-2 text-white'>
                 <p className='text-6xl font-bold'>{team.info.schoolName}</p>

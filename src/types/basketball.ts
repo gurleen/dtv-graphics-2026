@@ -167,3 +167,13 @@ export interface TeamStandingsRecord {
   win_pct: number;
   conf_win_pct: number;
 }
+
+export interface ScoreboardGame {
+  game_id: string;
+  home_team_id: string;
+  away_team_id: string;
+  home_score: string;
+  away_score: string;
+  period: number;
+  status: string;
+}

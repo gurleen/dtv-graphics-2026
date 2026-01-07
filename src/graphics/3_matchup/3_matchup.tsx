@@ -82,11 +82,11 @@ function TeamBox({ team, isHome }: { team: Team, isHome: boolean }) {
     return (
         <Rect id={`${idPrefix}-box`} width={785} height={189} color={team.info.primaryColor} className={`flex ${flexDir}`}>
             <Rect width={300} height={189} id={`${idPrefix}-logo`}>
-                <img src={team.info.knockoutLogoUrl} style={{ marginTop: -50, scale: 1.5 }} />
+                <img src={team.info.knockoutLogoUrl + `?t=${Date.now()}`} style={{ marginTop: -50, scale: 1.5 }} />
             </Rect>
             <Rect width={485} height={189} className={`flex flex-col items-end px-5 text-white justify-center ${textAlign}`}>
-                <p id={`${idPrefix}-school-name`} className='font-extrabold text-7xl'>{team.info.schoolName.toUpperCase()}</p>
-                <p id={`${idPrefix}-team-name`} className='font-black text-8xl'>{team.info.teamName.toUpperCase()}</p>
+                <p id={`${idPrefix}-school-name`} className='font-medium text-6xl'>{team.info.schoolName.toUpperCase()}</p>
+                <p id={`${idPrefix}-team-name`} className='font-black text-7xl'>{team.info.teamName.toUpperCase()}</p>
             </Rect>
         </Rect>
     );

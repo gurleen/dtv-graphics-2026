@@ -78,7 +78,7 @@ function PlayerToWatch({ gfx, isHome, teamData, playerNumber, text }: Data) {
                 <div className='flex justify-center w-full h-full' id='container' style={{ marginTop: 850 }}>
                     <Rect width={500} height={145} color={team.info.primaryColor} className='flex'>
                         <ZLayers>
-                            <img src={team.info.knockoutLogoUrl} width={350} height={350} style={{ marginLeft: 275, marginTop: -100 }} />
+                            <img src={team.info.knockoutLogoUrl + `?t=${Date.now()}`} width={350} height={350} style={{ marginLeft: 275, marginTop: -100 }} />
 
                             <Rect height={145} className='flex flex-col leading-10 text-white font-bold items-start justify-center ms-3'>
                                 <p className='text-5xl'>{player?.firstName}</p>
