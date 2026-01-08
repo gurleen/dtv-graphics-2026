@@ -29,7 +29,7 @@ export function GlobalSettingsProvider({ children }: { children: ReactNode }) {
     });
 
     if (!teams || !settings) {
-        return <div>Loading global settings...</div>;
+        return <></>;
     }
 
     const teamSearch = teams.map(t => ({ value: t.team_id, label: t.display_name }))

@@ -7,6 +7,7 @@ import { BasketballSettingsTab } from './tabs/basketball';
 import { Sport } from '@/data/models';
 import { WrestlingSettingsTab } from './tabs/wrestling';
 import { ObjectStoreProvider } from '@/contexts/ObjectStoreContext';
+import { AroundTheConfTab } from './tabs/around-the-conf';
 
 const fontFamily = "Berkeley Mono, Berkeley Mono Variable";
 const primaryColor = '#009E67';
@@ -15,7 +16,8 @@ const pageMapping = new Map([
     ['SPORT', SportSettingsTab],
     ['TEAM', TeamSettingsTab],
     ['BASKETBALL', BasketballSettingsTab],
-    ['WRESTLING', WrestlingSettingsTab]
+    ['WRESTLING', WrestlingSettingsTab],
+    ["AROUND THE CONF", AroundTheConfTab]
 ]);
 
 function Page() {
@@ -71,6 +73,7 @@ function Sidebar() {
             <SidebarTabButton name='TEAM' />
             <SidebarTabButton disabled={basketballDisabled} name='BASKETBALL' />
             <SidebarTabButton disabled={wrestlingDisabled} name='WRESTLING' />
+            <SidebarTabButton name='AROUND THE CONF' />
         </fieldset>
     );
 }

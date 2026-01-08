@@ -1,7 +1,7 @@
 import { watch, type FSWatcher } from "node:fs";
-import { parseXmlFile, getStats, resetStats } from "./statcrew-xml";
+import { parseXmlFile, getStats, resetStats, getPlays, getLastScores, type LastScores } from "./statcrew-xml";
 import indexHtml from "./index.html";
-import type { GameLiveStats } from "@/types/basketball";
+import type { GameLiveStats, Play } from "@/types/basketball";
 
 const ObjectStoreSetUrl = "https://live-data.dragonstv.io/set";
 
@@ -26,13 +26,33 @@ function broadcastToClients(message: any) {
   });
 }
 
-async function pushToObjectStore(stats: GameLiveStats) {
+async function pushStatsToObjectStore(stats: GameLiveStats) {
   const req = await fetch(ObjectStoreSetUrl, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({ key: "basketball-live-stats", value: stats })
+  });
+}
+
+async function pushPlaysToObjectStore(plays: Play[]) {
+  const req = await fetch(ObjectStoreSetUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ key: "basketball-live-plays", value: plays })
+  });
+}
+
+async function pushLastScoresToObjectStore(lastScores: LastScores) {
+  const req = await fetch(ObjectStoreSetUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ key: "basketball-live-last-scores", value: lastScores })
   });
 }
 
@@ -47,11 +67,25 @@ async function startWatching(filePath: string) {
   // Parse initial file
   try {
     await parseXmlFile(filePath);
+    
     const stats = getStats();
-    await pushToObjectStore(stats);
+    await pushStatsToObjectStore(stats);
+
+    const plays = getPlays();
+    await pushPlaysToObjectStore(plays);
+
+    const lastScores = getLastScores();
+    await pushLastScoresToObjectStore(lastScores);
+
     broadcastToClients({
       type: "stats_update",
       data: stats,
+      timestamp: new Date().toISOString(),
+    });
+
+    broadcastToClients({
+      type: "plays_update",
+      data: plays,
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
@@ -71,13 +105,23 @@ async function startWatching(filePath: string) {
       try {
         const changes = await parseXmlFile(filePath);
         const stats = getStats();
+        const plays = getPlays();
+        const lastScores = getLastScores();
 
-        await pushToObjectStore(stats);
+        await pushStatsToObjectStore(stats);
+        await pushPlaysToObjectStore(plays);
+        await pushLastScoresToObjectStore(lastScores);
 
         broadcastToClients({
           type: "stats_update",
           data: stats,
           changes,
+          timestamp: new Date().toISOString(),
+        });
+
+        broadcastToClients({
+          type: "plays_update",
+          data: plays,
           timestamp: new Date().toISOString(),
         });
       } catch (error) {
@@ -116,7 +160,7 @@ function stopWatching() {
 }
 
 const server = Bun.serve({
-  port: 3000,
+  port: 3002,
   routes: {
     "/": indexHtml,
   },
@@ -150,6 +194,15 @@ const server = Bun.serve({
           JSON.stringify({
             type: "stats_update",
             data: stats,
+            timestamp: new Date().toISOString(),
+          })
+        );
+
+        const plays = getPlays();
+        ws.send(
+          JSON.stringify({
+            type: "plays_update",
+            data: plays,
             timestamp: new Date().toISOString(),
           })
         );

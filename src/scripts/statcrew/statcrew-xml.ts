@@ -1,10 +1,11 @@
-import type { GameLiveStats, PlayerStats, TeamPlayers } from "@/types/basketball";
+import type { GameLiveStats, PlayerStats, TeamPlayers, Play, LastScoreInfo, LastScores } from "@/types/basketball";
 import { watch } from "node:fs";
 import { parseStringPromise } from "xml2js";
 
 // In-memory storage for parsed player data
 let visitorPlayers: TeamPlayers | null = null;
 let homePlayers: TeamPlayers | null = null;
+let plays: Play[] = [];
 
 function parsePlayerStats(playerXml: any): PlayerStats {
   const stats = playerXml.stats?.[0]?.$;
@@ -33,6 +34,30 @@ function parsePlayerStats(playerXml: any): PlayerStats {
     fgpct: parseFloat(stats?.fgpct || "0"),
     fg3pct: parseFloat(stats?.fg3pct || "0"),
     ftpct: parseFloat(stats?.ftpct || "0"),
+  };
+}
+
+function parsePlay(playXml: any, period: number): Play | null {
+  const attrs = playXml.$;
+
+  // Skip plays that don't have vh attribute (like clock and summary entries)
+  if (!attrs?.vh) {
+    return null;
+  }
+
+  return {
+    period,
+    vh: attrs.vh,
+    time: attrs.time || "",
+    uni: attrs.uni || "",
+    team: attrs.team || "",
+    checkname: attrs.checkname || "",
+    action: attrs.action || "",
+    type: attrs.type,
+    vscore: attrs.vscore ? parseInt(attrs.vscore) : undefined,
+    hscore: attrs.hscore ? parseInt(attrs.hscore) : undefined,
+    side: attrs.side,
+    fastb: attrs.fastb,
   };
 }
 
@@ -181,6 +206,28 @@ async function parseXmlFile(filePath: string): Promise<string[]> {
         (visitorPlayers?.players.length || 0) + (homePlayers?.players.length || 0)
       }`
     );
+
+    // Parse plays from all periods
+    const oldPlaysCount = plays.length;
+    const periodsData = result.bbgame?.plays?.[0]?.period || [];
+    const newPlays: Play[] = [];
+
+    for (const periodData of periodsData) {
+      const periodNumber = parseInt(periodData.$.number);
+      const playsInPeriod = periodData.play || [];
+
+      for (const playXml of playsInPeriod) {
+        const play = parsePlay(playXml, periodNumber);
+        if (play) {
+          newPlays.push(play);
+        }
+      }
+    }
+
+    plays = newPlays;
+    console.log(
+      `\nPlays in memory: ${plays.length} (${plays.length - oldPlaysCount > 0 ? '+' : ''}${plays.length - oldPlaysCount})`
+    );
   } catch (error) {
     console.error("Error parsing XML file:", error);
     throw error;
@@ -207,6 +254,53 @@ async function watchXmlFile(filePath: string): Promise<void> {
   console.log("\nWatching for file changes. Press Ctrl+C to exit.\n");
 }
 
+function getLastScores(): LastScores {
+  const result: LastScores = {
+    visitor: { lastPoint: null, lastFieldGoal: null },
+    home: { lastPoint: null, lastFieldGoal: null },
+  };
+
+  // Iterate through plays in reverse (newest first)
+  for (let i = plays.length - 1; i >= 0; i--) {
+    const play = plays[i];
+    if (!play) continue;
+
+    const isVisitor = play.vh === "V";
+    const teamScores = isVisitor ? result.visitor : result.home;
+
+    // Check if this is a scoring play
+    if (play.action === "GOOD") {
+      const scoreInfo: LastScoreInfo = {
+        period: play.period,
+        time: play.time,
+        playIndex: i,
+      };
+
+      // Check for any point (including FT)
+      if (teamScores.lastPoint === null) {
+        teamScores.lastPoint = scoreInfo;
+      }
+
+      // Check for field goal (exclude FT)
+      if (play.type !== "FT" && teamScores.lastFieldGoal === null) {
+        teamScores.lastFieldGoal = scoreInfo;
+      }
+    }
+
+    // Exit early if we've found all four values
+    if (
+      result.visitor.lastPoint &&
+      result.visitor.lastFieldGoal &&
+      result.home.lastPoint &&
+      result.home.lastFieldGoal
+    ) {
+      break;
+    }
+  }
+
+  return result;
+}
+
 // Helper functions for server use
 function getStats(): GameLiveStats {
   return {
@@ -215,9 +309,14 @@ function getStats(): GameLiveStats {
   };
 }
 
+function getPlays(): Play[] {
+  return plays;
+}
+
 function resetStats() {
   visitorPlayers = null;
   homePlayers = null;
+  plays = [];
   console.log("Stats reset");
 }
 
@@ -230,11 +329,12 @@ if (import.meta.main) {
 
 // Export for potential use in other modules
 export {
-  type PlayerStats,
-  type TeamPlayers,
   visitorPlayers,
   homePlayers,
+  plays,
   parseXmlFile,
   getStats,
+  getPlays,
+  getLastScores,
   resetStats,
 };

@@ -9,7 +9,9 @@ export type StatOptions =
     "3FG" |
     "3FG%" |
     "FT"  |
-    "FT%"
+    "FT%" |
+    "TO"  |
+    "PF";
 
 export const AvailableStats: StatOptions[] = [
     "PTS",
@@ -22,12 +24,23 @@ export const AvailableStats: StatOptions[] = [
     "3FG",
     "3FG%",
     "FT",
-    "FT%"
+    "FT%", 
+    "TO",
+    "PF"
 ];
 
 export type TimerOptions = "LastScore" | "LastFG";
 export const TimerOptionsValues: TimerOptions[] = ["LastScore", "LastFG"];
 export const TimerOptionsSearch = TimerOptionsValues.map(x => ({value: x, label: x}));
+
+export function getTimerOptionDisplayString(option: TimerOptions): string {
+    const displayMap: Record<TimerOptions, string> = {
+        "LastScore": "SCORING DROUGHT",
+        "LastFG": "FG DROUGHT"
+    };
+
+    return displayMap[option];
+}
 
 export const AvailableStatsSelect = AvailableStats.map(x => ({ value: x, label: x.toString() }));
 
@@ -40,10 +53,12 @@ export function getStatDisplayString(stat: StatOptions): string {
         "BLK": "BLOCKS",
         "FG": "FIELD GOALS",
         "FG%": "FIELD GOAL PCT",
-        "3FG": "3-POINTERS",
+        "3FG": "THREE POINTERS",
         "3FG%": "THREE POINTER PCT",
         "FT": "FREE THROWS",
-        "FT%": "FREE THROW PCT"
+        "FT%": "FREE THROW PCT",
+        "TO": "TURNOVERS",
+        "PF": "PERSONAL FOULS"
     };
 
     return displayMap[stat];
@@ -131,8 +146,74 @@ export function getPlayerStat(stats: PlayerStats, stat: StatOptions): number {
       return stats.ftm;
     case "FT%":
       return stats.ftpct;
+    case "TO":
+      return stats.to;
+    case "PF":
+      return stats.pf;
     default:
       return 0;
+  }
+}
+
+function getShootingDisplay(made: number, attempted: number): string {
+  return `${made}-${attempted}`;
+}
+
+function getShootingPercentage(made: number, attempted: number): string {
+  if (attempted === 0) return "0.0%";
+  return ((made / attempted) * 100).toFixed(1) + '%';
+}
+
+export function getTeamTotal(players: PlayerStats[], stat: StatOptions): string {
+  if (players.length === 0) return "0";
+
+  switch (stat) {
+    case "FG": {
+      const made = players.reduce((sum, p) => sum + p.fgm, 0);
+      const attempted = players.reduce((sum, p) => sum + p.fga, 0);
+      return getShootingDisplay(made, attempted);
+    }
+    case "3FG": {
+      const made = players.reduce((sum, p) => sum + p.fgm3, 0);
+      const attempted = players.reduce((sum, p) => sum + p.fga3, 0);
+      return getShootingDisplay(made, attempted);
+    }
+    case "FT": {
+      const made = players.reduce((sum, p) => sum + p.ftm, 0);
+      const attempted = players.reduce((sum, p) => sum + p.fta, 0);
+      return getShootingDisplay(made, attempted);
+    }
+    case "FG%": {
+      const made = players.reduce((sum, p) => sum + p.fgm, 0);
+      const attempted = players.reduce((sum, p) => sum + p.fga, 0);
+      return attempted > 0 ? getShootingPercentage(made, attempted) : "0.0%";
+    }
+    case "3FG%": {
+      const made = players.reduce((sum, p) => sum + p.fgm3, 0);
+      const attempted = players.reduce((sum, p) => sum + p.fga3, 0);
+      return attempted > 0 ? getShootingPercentage(made, attempted) : "0.0%";
+    }
+    case "FT%": {
+      const made = players.reduce((sum, p) => sum + p.ftm, 0);
+      const attempted = players.reduce((sum, p) => sum + p.fta, 0);
+      return attempted > 0 ? getShootingPercentage(made, attempted) : "0.0%";
+    }
+    case "PTS":
+      return players.reduce((sum, p) => sum + p.tp, 0).toString();
+    case "REB":
+      return players.reduce((sum, p) => sum + p.treb, 0).toString();
+    case "AST":
+      return players.reduce((sum, p) => sum + p.ast, 0).toString();
+    case "STL":
+      return players.reduce((sum, p) => sum + p.stl, 0).toString();
+    case "BLK":
+      return players.reduce((sum, p) => sum + p.blk, 0).toString();
+    case "TO":
+      return players.reduce((sum, p) => sum + p.to, 0).toString();
+    case "PF":
+      return players.reduce((sum, p) => sum + p.pf, 0).toString();
+    default:
+      return "0";
   }
 }
 
@@ -176,4 +257,100 @@ export interface ScoreboardGame {
   away_score: string;
   period: number;
   status: string;
+}
+
+export interface Play {
+  period: number; // 1 for first half, 2 for second half
+  vh: string; // "V" for visitor, "H" for home
+  time: string; // game clock time (e.g., "19:32")
+  uni: string; // player uniform number
+  team: string; // team name
+  checkname: string; // player check name
+  action: string; // GOOD, MISS, FOUL, TURNOVER, REBOUND, etc.
+  type?: string; // JUMPER, 3PTR, LAYUP, FT, etc.
+  vscore?: number; // visitor score after play
+  hscore?: number; // home score after play
+  side?: string; // left or right
+  fastb?: string; // Y if fast break
+}
+
+export interface LastScoreInfo {
+  period: number;
+  time: string;
+  playIndex: number;
+}
+
+export interface TeamLastScores {
+  lastPoint: LastScoreInfo | null;
+  lastFieldGoal: LastScoreInfo | null;
+}
+
+export interface LastScores {
+  visitor: TeamLastScores;
+  home: TeamLastScores;
+}
+
+/**
+ * Converts a time string (MM:SS) to total seconds
+ */
+function timeToSeconds(time: string): number {
+  const parts = time.split(":");
+  const minutes = parseInt(parts[0] || "0");
+  const seconds = parseInt(parts[1] || "0");
+  return minutes * 60 + seconds;
+}
+
+/**
+ * Formats seconds into a duration string (e.g., "2:35" or "0:45")
+ */
+function formatDuration(totalSeconds: number): string {
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+}
+
+/**
+ * Calculates the elapsed time since a last score
+ * @param lastScore - The last score information
+ * @param currentPeriod - Current game period
+ * @param currentClock - Current game clock (MM:SS format)
+ * @returns A duration string representing the scoring drought (e.g., "2:35")
+ */
+export function getTimeSinceLastScore(
+  lastScore: LastScoreInfo | null,
+  currentPeriod: number,
+  currentClock: string
+): string {
+  if (!lastScore) {
+    return "0:00";
+  }
+
+  const currentSeconds = timeToSeconds(currentClock);
+  const lastScoreSeconds = timeToSeconds(lastScore.time);
+
+  // If in the same period
+  if (lastScore.period === currentPeriod) {
+    // In basketball, clock counts down, so elapsed = lastScoreTime - currentTime
+    const elapsed = lastScoreSeconds - currentSeconds;
+    return formatDuration(Math.max(0, elapsed));
+  }
+
+  // If in a later period
+  if (currentPeriod > lastScore.period) {
+    // Time remaining in the period when the score happened
+    const timeRemainingInLastScorePeriod = lastScoreSeconds;
+
+    // Full periods between the last score period and current period
+    const periodsBetween = currentPeriod - lastScore.period - 1;
+    const fullPeriodsTime = periodsBetween * 20 * 60; // 20 minutes per period
+
+    // Time elapsed in current period (from start of period to current clock)
+    const timeElapsedInCurrentPeriod = (20 * 60) - currentSeconds; // 20 min period
+
+    const totalElapsed = timeRemainingInLastScorePeriod + fullPeriodsTime + timeElapsedInCurrentPeriod;
+    return formatDuration(totalElapsed);
+  }
+
+  // If currentPeriod < lastScore.period (shouldn't happen)
+  return "0:00";
 }

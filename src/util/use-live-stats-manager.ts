@@ -11,7 +11,7 @@ export function useGameState() {
     useEffect(() => {
         client.current = new TypedLiveDataHubClient();
         client.current.onGameStateUpdated(s => {
-            console.log("new game state", s);
+            console.debug("new game state", s);
             setGameState(s);
         });
         console.log(client.current);

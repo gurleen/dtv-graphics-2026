@@ -8,6 +8,11 @@ import { createContext, useContext } from 'react';
 import { getTeamKnockoutLogo, type TeamInfo } from '@/types/team';
 import { Rect } from '@/components/rect';
 import _ from 'lodash';
+import type { GameVideoFeed } from '@/types/misc';
+import { ZLayers } from '@/util/layers';
+import ReactPlayer from 'react-player';
+import FadeContainer from '@/components/fade-container';
+import { useAroundTheConfStreams } from '@/hooks/misc';
 
 
 const confLogo = "https://images.dragonstv.io/sponsors/CAAWhite.png";
@@ -23,6 +28,7 @@ const box20Height = boxHeight * 0.2;
 interface PageContextType {
     teams: TeamInfo[];
     games: ScoreboardGame[];
+    streams: GameVideoFeed[];
 }
 
 const PageContext = createContext<PageContextType | null>(null);
@@ -37,7 +43,7 @@ export function usePageContext() {
 
 function animation(timeline: gsap.core.Timeline) {
     timeline
-        .delay(0.5)
+        .delay(1)
         .from("#graphic", { opacity: 0, duration: 0.75, ease: 'expo.out' })
         .addPause()
         .to("#graphic", { opacity: 0, duration: 0.5, ease: 'expo.out' });
@@ -46,11 +52,12 @@ function animation(timeline: gsap.core.Timeline) {
 function PageRoot() {
     const teams = useTeamData();
     const { data: records } = useSpxObject<ScoreboardGame[]>("basketball", "scoreboard.json");
+    const {streams} = useAroundTheConfStreams();
 
-    if (!isDefined(records) || !isDefined(teams)) { return null; }
+    if (!isDefined(records) || !isDefined(teams) || !isDefined(streams)) { return null; }
 
     return (
-        <PageContext.Provider value={{ teams, games: records }}>
+        <PageContext.Provider value={{ teams, games: records, streams }}>
             <AroundTheConf />
         </PageContext.Provider>
     );
@@ -76,7 +83,7 @@ function AroundTheConf() {
                     </div>
                     <Rect height={150} width={1920} color='#131313' className='flex gap-10 py-5 items-center justify-center'>
                         {_.range(0, 6).map(i => (
-                            <img src={confLogo} alt="Conference Logo" className={`max-h-[80%] ${i % 2 === 0 ? 'opacity-70' : 'opacity-100'}`} />
+                            <img key={i} src={confLogo} alt="Conference Logo" className={`max-h-[80%] ${i % 2 === 0 ? 'opacity-70' : 'opacity-100'}`} />
                         ))}
                     </Rect>
                 </div>
@@ -87,27 +94,36 @@ function AroundTheConf() {
 
 
 function TeamBox({ game }: { game: ScoreboardGame }) {
-    const { teams } = usePageContext();
+    const { teams, streams } = usePageContext();
     const homeTeam = teams.find(t => t.team_id.toString() === game.home_team_id)!;
     const awayTeam = teams.find(t => t.team_id.toString() === game.away_team_id)!;
+    const gameStream = streams.find(s => s.game_id === game.game_id);
 
     const homeLogo = getTeamKnockoutLogo(homeTeam);
     const awayLogo = getTeamKnockoutLogo(awayTeam);
 
     return (
-        <Rect width={boxWidth} height={boxHeight} className='flex flex-wrap w-full h-full text-white'>
-            <Rect width={boxHalfWidth} height={box80Height} color={homeTeam.color} className='flex flex-col items-center justify-center'>
-                <img src={homeLogo} alt={homeTeam.short_name} className='max-h-[70%] max-w-[70%]' />
-                <p className='text-6xl font-bold text-shadow-lg/60'>{game.home_score}</p>
+        <ZLayers>
+            <Rect width={boxWidth} height={boxHeight} className='flex flex-wrap w-full h-full text-white'>
+                <Rect width={boxHalfWidth} height={box80Height} color={homeTeam.color} className='flex flex-col items-center justify-center'>
+                    <img src={homeLogo} alt={homeTeam.short_name} className='max-h-[70%] max-w-[70%] drop-shadow-2xl/80' />
+                    <p className='text-6xl font-bold drop-shadow-2xl/80'>{game.home_score}</p>
+                </Rect>
+                <Rect width={boxHalfWidth} height={box80Height} color={awayTeam.color} className='flex flex-col items-center justify-center'>
+                    <img src={awayLogo} alt={awayTeam.short_name} className='max-h-[70%] max-w-[70%] drop-shadow-2xl/80' />
+                    <p className='text-6xl font-bold drop-shadow-2xl/80'>{game.away_score}</p>
+                </Rect>
+                <Rect width={boxWidth} height={box20Height} color='#131313' className='flex px-2 items-center justify-center'>
+                    <p className='text-white font-semibold text-4xl drop-shadow-white drop-shadow-sm/80'>{game.status}</p>
+                </Rect>
             </Rect>
-            <Rect width={boxHalfWidth} height={box80Height} color={awayTeam.color} className='flex flex-col items-center justify-center'>
-                <img src={awayLogo} alt={awayTeam.short_name} className='max-h-[70%] max-w-[70%] mx-auto' />
-                <p className='text-6xl font-bold text-shadow-lg/60'>{game.away_score}</p>
-            </Rect>
-            <Rect width={boxWidth} height={box20Height} color='#131313' className='flex px-2 items-center justify-center'>
-                <p className='text-white font-semibold text-4xl'>{game.status}</p>
-            </Rect>
-        </Rect>
+
+            {isDefined(gameStream) && (
+                <FadeContainer visible={gameStream.showing}>
+                    <ReactPlayer src={gameStream.url} width={boxWidth} height={boxHeight} muted={true} autoPlay={true} />
+                </FadeContainer>
+            )}
+        </ZLayers>
     );
 }
 

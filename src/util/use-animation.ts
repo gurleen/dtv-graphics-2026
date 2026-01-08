@@ -39,21 +39,29 @@ export default function useAnimation(animFunc: AnimationFunc) {
     return container;
 }
 
-export function useSubAnimation(animFunc: AnimationFunc, playing: boolean) {
+export function useSubAnimation(animFunc: AnimationFunc, playing: boolean, ready: boolean = true) {
     const container = useRef(null);
     const tl = useRef<gsap.core.Timeline | null>(null);
     const [isPlaying, setIsPlaying] = useState<boolean>(false);
 
     useGSAP(() => {
+        if (!ready) return;
+
         tl.current = gsap
             .timeline({ onComplete: () => { tl.current?.seek(0).pause(); }, paused: true});
         animFunc(tl.current);
-    }, { scope: container });
 
-    useEffect(() => {
+        checkIfShouldPlay();
+    }, { scope: container, dependencies: [ready] });
+
+    const checkIfShouldPlay = () => {
         if(isPlaying != playing) { tl.current?.play(); }
         setIsPlaying(playing);
-    })
+    }
+
+    useEffect(() => {
+        checkIfShouldPlay();
+    }, [playing, ready]);
 
     return container;
 }

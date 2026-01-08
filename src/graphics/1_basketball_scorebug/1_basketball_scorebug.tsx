@@ -14,10 +14,11 @@ import { useGameState } from "@/util/use-live-stats-manager";
 import type { Player, PlayerStats, SliderState } from "@/data/models";
 import { FadeText } from "@/components/fade-text";
 import { ZLayers } from "@/util/layers";
-import useProps from "@/util/use-props";
 import { GlobalSettingsProvider } from "@/contexts/GlobalSettingsContext";
-import { ObjectStoreProvider } from "@/contexts/ObjectStoreContext";
-
+import { BasketballBugStateProvider, useBasketballBugStateContext } from "@/contexts/BasketballBugStateContext";
+import { ObjectStoreProvider, useObjectStoreContext } from "@/contexts/ObjectStoreContext";
+import { getStatDisplayString, getTeamTotal, getTimerOptionDisplayString, getTimeSinceLastScore, type GameLiveStats, type getPlayerStat, type LastScores, type StatOptions } from "@/types/basketball";
+import { isDefined } from "@/util/utils";
 
 const sponsorLogo = "https://images.dragonstv.io/sponsors/Independence.png";
 
@@ -39,8 +40,8 @@ interface Props {
 function getTeams(): BasketballScorebugData | undefined {
     const appState = useAppState();
     const liveData = useGameState();
-    const props = useProps<Props>();
-    // const props = { infoBoxCovered: false, infoBoxText: 'FINAL' }
+    // const props = useProps<Props>();
+    const props = { infoBoxCovered: "0", infoBoxText: 'FINAL' }
 
     if (!appState || !liveData || !props) return undefined;
 
@@ -78,7 +79,9 @@ function PageRoot() {
     return (
         <GlobalSettingsProvider>
             <ObjectStoreProvider>
-                {props && <BasketballScorebug props={props} />}
+                <BasketballBugStateProvider>
+                    {props && <BasketballScorebug props={props} />}
+                </BasketballBugStateProvider>
             </ObjectStoreProvider>
         </GlobalSettingsProvider>
     );
@@ -94,7 +97,12 @@ function BasketballScorebug({ props }: { props: BasketballScorebugData }) {
                     <div className="flex w-full h-full justify-around" style={{ marginTop: 900 }}>
                         <TeamSliderContainer state={props.scorebug.awaySlider} isHome={false} teamInfo={props.awayTeam} />
                         <div id="scorebug flex flex-col items-center" style={{ marginTop: -45 }}>
-                            <TextSlider props={props} />
+                            <ZLayers>
+                                <TextSlider props={props} />
+                                <ComparisonSlider props={props} />
+                                <ScoringDroughtSlider isHome={false} props={props} />
+                                <ScoringDroughtSlider isHome={true} props={props} />
+                            </ZLayers>
                             <div id="main-bar" className="flex z-10 relative">
                                 <TeamBox isHome={false} teamInfo={props.awayTeam} />
                                 <ZLayers>
@@ -110,6 +118,82 @@ function BasketballScorebug({ props }: { props: BasketballScorebugData }) {
                 </AnimationContainer>
             </div>}
         </>
+    );
+}
+
+function scoringDroughtSliderAnimation(timeline: gsap.core.Timeline) {
+    timeline
+        .from("#slider", { y: 100, duration: 0.3, ease: 'power3.out' })
+        .addPause()
+        .to("#slider", { y: 100, duration: 0.3, ease: 'power3.out' })
+}
+
+function ScoringDroughtSlider({ isHome, props }: { isHome: boolean, props: BasketballScorebugData }) {
+    const team = isHome ? props.homeTeam : props.awayTeam;
+    const { bugState } = useBasketballBugStateContext();
+    const [lastScores] = useObjectStoreContext<LastScores>('basketball-live-last-scores');
+    const teamBugState = isHome ? bugState.homeTeam : bugState.awayTeam;
+    const timerType = teamBugState.timer.type;
+    const titleText = getTimerOptionDisplayString(timerType);
+    const container = useSubAnimation(scoringDroughtSliderAnimation, teamBugState.timer.showing, isDefined(lastScores));
+
+    if (!isDefined(lastScores)) { return (<></>); }
+
+    const period = parseInt(props.info.period.charAt(0));
+    const teamLastScoreInfo = isHome ? lastScores.home : lastScores.visitor;
+    const teamLastScore = timerType == "LastScore" ? teamLastScoreInfo.lastPoint : teamLastScoreInfo.lastFieldGoal;
+    const droughtTime = getTimeSinceLastScore(teamLastScore, 3, props.info.clock);
+
+    return (
+        <div ref={container} className="overflow-hidden">
+            <div id="slider" className={`flex ${isHome ? "justify-end" : "justify-start"} overflow-hidden`}>
+                <Rect width={247} height={45} color={team.color} className="flex items-center px-3 justify-between">
+                    <p className="text-white text-3xl font-bold">{titleText}</p>
+                    <Rect width={50} className="text-end">
+                        <p className="text-white text-2xl font-semibold tabular-nums">{droughtTime}</p>
+                    </Rect>
+                </Rect>
+            </div>
+        </div>
+    );
+}
+
+function comparisonSliderAnimation(timeline: gsap.core.Timeline) {
+    timeline
+        .from("#slider", { y: 100, duration: 0.3, ease: 'power3.out' })
+        .addPause()
+        .to("#slider", { y: 100, duration: 0.3, ease: 'power3.out' })
+}
+
+function ComparisonSlider({ props }: { props: BasketballScorebugData }) {
+    const { bugState } = useBasketballBugStateContext();
+    const [stats] = useObjectStoreContext<GameLiveStats>('basketball-live-stats');
+
+    const statsReady = isDefined(stats) && isDefined(stats.home) && isDefined(stats.visitor);
+    const showing = statsReady && bugState.comparisonStat.showing;
+    const container = useSubAnimation(comparisonSliderAnimation, showing, statsReady);
+
+    if (!isDefined(stats) || !isDefined(stats.home) || !isDefined(stats.visitor)) { return (<></>); }
+    const statDisplayName = getStatDisplayString(bugState.comparisonStat.stat);
+    const homeValue = getTeamTotal(stats.home.players, bugState.comparisonStat.stat);
+    const awayValue = getTeamTotal(stats.visitor.players, bugState.comparisonStat.stat);
+
+    return (
+        <div ref={container} className="overflow-hidden">
+            <Rect id="slider" width={851} height={45} className="flex items-center gap-2 text-white text-3xl" style={{ backgroundColor: 'rgba(19, 19, 19, 0.95)' }}>
+                <Rect width={247} height={45} color={props.awayTeam.color} className="center-x-y text-3xl font-semibold">
+                    <FadeText text={awayValue} />
+                </Rect>
+
+                <Rect width={340} height={45} className="center-x-y font-bold text-4xl">
+                    <FadeText text={statDisplayName} />
+                </Rect>
+
+                <Rect width={247} height={45} color={props.homeTeam.color} className="center-x-y text-3xl font-semibold">
+                    <FadeText text={homeValue} />
+                </Rect>
+            </Rect>
+        </div>
     );
 }
 
@@ -267,6 +351,7 @@ function TeamBox({ isHome, teamInfo }: { isHome: boolean, teamInfo: TeamInfo }) 
 
 function InfoBox({ gameInfo }: { gameInfo: GameInfo }) {
     const bgGradient = useMemo(() => getBgGradient("#1a1a1a"), []);
+    const clockStr = gameInfo.clock.startsWith('.') ? `0${gameInfo.clock}` : gameInfo.clock;
 
     function getShotClockColor(shotClock: number): string {
         if (shotClock == 0) return "invisible";
@@ -283,7 +368,7 @@ function InfoBox({ gameInfo }: { gameInfo: GameInfo }) {
             </Rect>
             <Rect id="clock-bg" width={159} height={56} color="#ffffff" borderRadius="22px" className="flex justify-around items-center">
                 <p className="font-black text-4xl tracking-tight w-full text-center tabular-nums">
-                    {gameInfo.clock}
+                    {clockStr}
                 </p>
             </Rect>
             <Rect width={99} height={56} className="flex items-center justify-around">
@@ -300,7 +385,7 @@ function infoBoxCoverAnimation(timeline: gsap.core.Timeline) {
         .to("#info-box-cover", { opacity: 0, duration: 0.3, ease: 'circ.inOut' })
 }
 
-function InfoBoxCover({ showing, text }: {showing: boolean, text: string}) {
+function InfoBoxCover({ showing, text }: { showing: boolean, text: string }) {
     const bgGradient = useMemo(() => getBgGradient("#1a1a1a"), []);
     const container = useSubAnimation(infoBoxCoverAnimation, showing);
 
@@ -366,12 +451,14 @@ function TeamSubBar({ isHome, timeouts, bonus }: { isHome: boolean, timeouts: nu
 }
 
 function SubBar({ props }: { props: BasketballScorebugData }) {
+    const { bugState } = useBasketballBugStateContext();
+
     return (
         <div id="sub-bar" className="z-0 relative opacity-90">
             <Rect width={851} height={35} color="#000000" className="flex justify-around">
-                <TeamSubBar isHome={false} timeouts={props.awayTeam.timeouts} bonus={props.awayTeam.bonus} />
+                <TeamSubBar isHome={false} timeouts={bugState.awayTeam.timeouts} bonus={bugState.awayTeam.bonus} />
                 <SponsorLogo />
-                <TeamSubBar isHome={true} timeouts={props.homeTeam.timeouts} bonus={props.homeTeam.bonus} />
+                <TeamSubBar isHome={true} timeouts={bugState.homeTeam.timeouts} bonus={bugState.homeTeam.bonus} />
             </Rect>
         </div>
     );

@@ -39,12 +39,28 @@ interface StatsData {
   home: TeamPlayers | null;
 }
 
-type TabType = "settings" | "visitor" | "home";
+interface Play {
+  period: number;
+  vh: string;
+  time: string;
+  uni: string;
+  team: string;
+  checkname: string;
+  action: string;
+  type?: string;
+  vscore?: number;
+  hscore?: number;
+  side?: string;
+  fastb?: string;
+}
+
+type TabType = "settings" | "visitor" | "home" | "plays";
 
 function App() {
   const [filePath, setFilePath] = useState("/Users/gurleen/Downloads/bbgame.xml");
   const [isWatching, setIsWatching] = useState(false);
   const [stats, setStats] = useState<StatsData>({ visitor: null, home: null });
+  const [plays, setPlays] = useState<Play[]>([]);
   const [lastUpdate, setLastUpdate] = useState<string | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<"connecting" | "connected" | "disconnected">("connecting");
   const [activeTab, setActiveTab] = useState<TabType>("settings");
@@ -75,6 +91,10 @@ function App() {
         case "stats_update":
           setStats(message.data);
           setLastUpdate(message.timestamp);
+          break;
+
+        case "plays_update":
+          setPlays(message.data);
           break;
 
         case "error":
@@ -170,6 +190,80 @@ function App() {
       tp: 0, blk: 0, stl: 0, ast: 0, min: 0,
       oreb: 0, dreb: 0, treb: 0, pf: 0, to: 0
     });
+  };
+
+  const renderPlaysTable = () => {
+    if (plays.length === 0) {
+      return (
+        <div>
+          <p className="text-gray-500 text-center py-8">No plays available. Start watching a file to see play-by-play data.</p>
+        </div>
+      );
+    }
+
+    // Reverse plays so newest are at the top
+    const reversedPlays = [...plays].reverse();
+
+    return (
+      <div>
+        <h2 className="text-sm font-bold mb-2 pb-1 border-b border-gray-300">
+          Play-by-Play <span className="text-gray-500 text-xs">({plays.length} total plays)</span>
+        </h2>
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-xs border-collapse border border-gray-400">
+            <thead style={{ background: 'linear-gradient(to bottom, #1f2937, #374151)' }}>
+              <tr>
+                <th className="px-1 py-1 text-center font-bold text-white border-r border-gray-500 text-xs sticky top-0">Period</th>
+                <th className="px-1 py-1 text-center font-bold text-white border-r border-gray-500 text-xs sticky top-0">Time</th>
+                <th className="px-1 py-1 text-center font-bold text-white border-r border-gray-500 text-xs sticky top-0">Team</th>
+                <th className="px-1 py-1 text-center font-bold text-white border-r border-gray-500 text-xs sticky top-0">#</th>
+                <th className="px-1 py-1 text-left font-bold text-white border-r border-gray-500 text-xs sticky top-0">Player</th>
+                <th className="px-1 py-1 text-center font-bold text-white border-r border-gray-500 text-xs sticky top-0">Action</th>
+                <th className="px-1 py-1 text-center font-bold text-white border-r border-gray-500 text-xs sticky top-0">Type</th>
+                <th className="px-1 py-1 text-center font-bold text-white text-xs sticky top-0">Score</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white">
+              {reversedPlays.map((play, index) => {
+                const isScoring = play.action === "GOOD" && (play.type === "JUMPER" || play.type === "3PTR" || play.type === "LAYUP" || play.type === "FT" || play.type === "DUNK" || play.type === "TIPIN");
+                const isMiss = play.action === "MISS";
+                const isTurnover = play.action === "TURNOVER";
+                const isFoul = play.action === "FOUL";
+                const rowClass = index % 2 === 0 ? 'bg-gray-50' : 'bg-white';
+
+                return (
+                  <tr key={index} className={`border border-gray-300 transition-colors ${rowClass} hover:bg-blue-50`}>
+                    <td className="px-1 py-0.5 text-center border-r border-gray-300 text-xs font-semibold">{play.period}</td>
+                    <td className="px-1 py-0.5 text-center border-r border-gray-300 text-xs font-mono">{play.time}</td>
+                    <td className="px-1 py-0.5 text-center border-r border-gray-300 text-xs font-medium" style={{ color: play.vh === 'V' ? '#dc2626' : '#2563eb' }}>{play.team}</td>
+                    <td className="px-1 py-0.5 text-center border-r border-gray-300 text-xs font-bold">{play.uni}</td>
+                    <td className="px-1 py-0.5 text-left border-r border-gray-300 text-xs">{play.checkname}</td>
+                    <td className={`px-1 py-0.5 text-center border-r border-gray-300 text-xs font-semibold ${
+                      isScoring ? 'text-green-700 bg-green-50' :
+                      isMiss ? 'text-red-700' :
+                      isTurnover ? 'text-orange-700' :
+                      isFoul ? 'text-yellow-700' : ''
+                    }`}>
+                      {play.action}
+                      {play.fastb === 'Y' && <span className="ml-1 text-purple-600 font-bold">⚡</span>}
+                    </td>
+                    <td className="px-1 py-0.5 text-center border-r border-gray-300 text-xs">{play.type || '-'}</td>
+                    <td className="px-1 py-0.5 text-center text-xs font-bold">
+                      {play.vscore !== undefined && play.hscore !== undefined ? (
+                        <span>{play.vscore}-{play.hscore}</span>
+                      ) : '-'}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        <div className="mt-2 pt-1 border-t border-gray-200 text-xs text-gray-600 font-medium">
+          Total: {plays.length} plays
+        </div>
+      </div>
+    );
   };
 
   const renderTeamTable = (teamData: TeamPlayers | null, label: string) => {
@@ -284,6 +378,16 @@ function App() {
                 >
                   Home {stats.home && `(${stats.home.team})`}
                 </button>
+                <button
+                  onClick={() => setActiveTab("plays")}
+                  className={`px-2 py-1 text-xs font-medium border-b-2 transition-colors ${
+                    activeTab === "plays"
+                      ? "border-blue-500 text-blue-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  }`}
+                >
+                  Plays ({plays.length})
+                </button>
               </div>
 
               <div className="flex items-center gap-1 px-2">
@@ -370,6 +474,7 @@ function App() {
 
             {activeTab === "visitor" && renderTeamTable(stats.visitor, "Visitor Team")}
             {activeTab === "home" && renderTeamTable(stats.home, "Home Team")}
+            {activeTab === "plays" && renderPlaysTable()}
           </div>
         </div>
       </div>

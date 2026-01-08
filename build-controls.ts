@@ -10,7 +10,8 @@ await rm(outDir, {
 
 const CONTROLS = [
   'text-slider',
-  'wrestling'
+  'wrestling',
+  'global'
 ]
 
 CONTROLS.forEach(async controlName => {
