@@ -1,7 +1,7 @@
 import { watch, type FSWatcher } from "node:fs";
-import { parseXmlFile, getStats, resetStats, getPlays, getLastScores, type LastScores } from "./statcrew-xml";
+import { parseXmlFile, getStats, resetStats, getPlays, getLastScores } from "./statcrew-xml";
 import indexHtml from "./index.html";
-import type { GameLiveStats, Play } from "@/types/basketball";
+import type { GameLiveStats, LastScores, Play } from "@/types/basketball";
 
 const ObjectStoreSetUrl = "https://live-data.dragonstv.io/set";
 

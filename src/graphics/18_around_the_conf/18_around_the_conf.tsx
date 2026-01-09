@@ -51,7 +51,7 @@ function animation(timeline: gsap.core.Timeline) {
 
 function PageRoot() {
     const teams = useTeamData();
-    const { data: records } = useSpxObject<ScoreboardGame[]>("basketball", "scoreboard.json");
+    const { data: records } = useSpxObject<ScoreboardGame[]>("basketball", "mbb_scoreboard.json");
     const {streams} = useAroundTheConfStreams();
 
     if (!isDefined(records) || !isDefined(teams) || !isDefined(streams)) { return null; }

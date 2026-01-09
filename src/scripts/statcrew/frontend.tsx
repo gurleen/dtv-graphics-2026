@@ -99,7 +99,7 @@ function App() {
 
         case "error":
           console.error("Error from server:", message.message);
-          alert(message.message);
+          // alert(message.message);
           break;
       }
     };
