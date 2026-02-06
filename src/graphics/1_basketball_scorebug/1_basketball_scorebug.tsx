@@ -32,15 +32,9 @@ function animation(timeline: gsap.core.Timeline) {
         .to(".anim-container", { opacity: 0, duration: 0.5, ease: "power3.inOut" });
 }
 
-interface Props {
-    infoBoxCovered: string
-    infoBoxText: string
-}
-
 function getTeams(): BasketballScorebugData | undefined {
     const appState = useAppState();
     const liveData = useGameState();
-    // const props = useProps<Props>();
     const props = { infoBoxCovered: "0", infoBoxText: 'FINAL' }
 
     if (!appState || !liveData || !props) return undefined;
