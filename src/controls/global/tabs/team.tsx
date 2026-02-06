@@ -106,9 +106,18 @@ function getContrastColor(color: Color): string {
     return luminance > 0.5 ? '#000000' : '#FFFFFF';
 }
 
+function createColor(hex: string) {
+    try {
+        return new Color(hex);
+    }
+    catch {
+        return new Color('#000000');
+    }
+}
+
 function ColorDisplayBox({color}: {color: string}) {
     const [copied, setCopied] = useState(false);
-    const colorObj = new Color(color);
+    const colorObj = createColor(color);
     const textColor = getContrastColor(colorObj);
 
     const onClick = () => {

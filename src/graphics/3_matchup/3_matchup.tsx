@@ -7,11 +7,12 @@ import { useMemo } from 'react';
 import * as ReactDOM from 'react-dom/client';
 
 const sponsorLogo = "https://images.dragonstv.io/sponsors/Independence.png";
-const confLogo = "https://images.dragonstv.io/sponsors/CAAWhite.png";
-const sportText = "DREXEL BASKETBALL PRESENTED BY";
 
-//const confLogo = "https://images.dragonstv.io/sponsors/EIWA.png";
-//const sportText = "DREXEL WRESTLING PRESENTED BY";
+// const confLogo = "https://images.dragonstv.io/sponsors/CAAWhite.png";
+// const sportText = "DREXEL BASKETBALL PRESENTED BY";
+
+const confLogo = "https://images.dragonstv.io/sponsors/EIWA.png";
+const sportText = "DREXEL WRESTLING PRESENTED BY";
 
 
 function animation(timeline: gsap.core.Timeline) {

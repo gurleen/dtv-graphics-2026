@@ -8,6 +8,7 @@ import useProps from '@/util/use-props';
 import { useMemo } from 'react';
 import * as ReactDOM from 'react-dom/client';
 import type { StartingLineupsLowerProps } from './props';
+import { GlobalSettingsProvider, useGlobalSettings } from '@/contexts/GlobalSettingsContext';
 
 const sponsorLogo = "https://images.dragonstv.io/sponsors/Independence.png";
 
@@ -36,9 +37,9 @@ function PageRoot() {
     const appState = useAppState();
 
     return (
-        <>
+        <GlobalSettingsProvider>
             {appState && props && <StartingLineupsLower gfx={appState} props={props} />}
-        </>
+        </GlobalSettingsProvider>
     );
 }
 
@@ -60,11 +61,14 @@ function getPlayer(teamData: TeamData, shirtNum: number): Player | undefined {
 
 function MainArea({ team, teamData, props }: { team: Team, teamData: TeamData, props: StartingLineupsLowerProps }) {
     const container = useAnimation(animation);
+    const { settings } = useGlobalSettings();
     const player1 = useMemo(() => getPlayer(teamData, props.starter1), [teamData, props]);
     const player2 = useMemo(() => getPlayer(teamData, props.starter2), [teamData, props]);
     const player3 = useMemo(() => getPlayer(teamData, props.starter3), [teamData, props]);
     const player4 = useMemo(() => getPlayer(teamData, props.starter4), [teamData, props]);
     const player5 = useMemo(() => getPlayer(teamData, props.starter5), [teamData, props]);
+
+    const sport = settings.sport;
 
     return (
         <div ref={container} style={{ fontFamily: 'Zuume Medium' }}>
@@ -74,11 +78,11 @@ function MainArea({ team, teamData, props }: { team: Team, teamData: TeamData, p
                         <Rect height={140} width={1920} className='flex' style={{ overflow: 'visible' }}>
                             <TeamBox team={team} />
                             <Rect width={920} height={140} color='#D8D8D8' className='flex anim-group-1' style={{ overflow: 'visible' }}>
-                                {player1 && <PlayerBox player={player1} team={team} sport={Sport.MensBasketball} />}
-                                {player2 && <PlayerBox player={player2} team={team} sport={Sport.MensBasketball} />}
-                                {player3 && <PlayerBox player={player3} team={team} sport={Sport.MensBasketball} />}
-                                {player4 && <PlayerBox player={player4} team={team} sport={Sport.MensBasketball} />}
-                                {player5 && <PlayerBox player={player5} team={team} sport={Sport.MensBasketball} />}
+                                {player1 && <PlayerBox player={player1} team={team} sport={sport} />}
+                                {player2 && <PlayerBox player={player2} team={team} sport={sport} />}
+                                {player3 && <PlayerBox player={player3} team={team} sport={sport} />}
+                                {player4 && <PlayerBox player={player4} team={team} sport={sport} />}
+                                {player5 && <PlayerBox player={player5} team={team} sport={sport} />}
                             </Rect>
                             <SponsorBar />
                         </Rect>

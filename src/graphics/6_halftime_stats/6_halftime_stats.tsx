@@ -1,10 +1,13 @@
 import AnimationContainer from '@/components/animation-container';
-import { type AppState, type Boxscore, type GameState, type ShotStats, type Team, type TeamGameState } from '@/data/models';
+import { type AppState, type Boxscore, type GameState, type ShotStats, type Team, type TeamGameState, type TeamSide } from '@/data/models';
 import { currentGameState, useAppState, useBoxscore } from '@/data/teams';
 import useAnimation from '@/util/use-animation';
 import * as ReactDOM from 'react-dom/client';
 import { Rect } from '@/components/rect';
 import { ZLayers } from '@/util/layers';
+import { ObjectStoreProvider, useObjectStoreContext } from '@/contexts/ObjectStoreContext';
+import { type GameLiveStats, getTeamTotal, type StatOptions } from '@/types/basketball';
+import { isDefined } from '@/util/utils';
 
 const sponsorLogo = "https://images.dragonstv.io/sponsors/DrexelPT.png";
 
@@ -20,20 +23,16 @@ function animation(timeline: gsap.core.Timeline) {
 function PageRoot() {
     const appState = useAppState();
     const gameState = currentGameState();
-    const boxscore = useBoxscore();
+    // const boxscore = useBoxscore();
 
     return (
-        <>
-            {appState && gameState && boxscore && <HalftimeAdjustments gfx={appState} game={gameState} box={boxscore} />}
-        </>
+        <ObjectStoreProvider>
+            {appState && gameState && <HalftimeAdjustments gfx={appState} game={gameState} />}
+        </ObjectStoreProvider>
     );
 }
 
-function shotStatsDisplay(stats: ShotStats): string {
-    return `${stats.made}-${stats.attempted}`;
-}
-
-function HalftimeAdjustments({ gfx, game, box }: { gfx: AppState, game: GameState, box: Boxscore }) {
+function HalftimeAdjustments({ gfx, game }: { gfx: AppState, game: GameState }) {
     const container = useAnimation(animation);
 
     return (
@@ -54,7 +53,7 @@ function HalftimeAdjustments({ gfx, game, box }: { gfx: AppState, game: GameStat
                                         <TeamScoreBox name={gfx.homeTeam.info.abbreviation} score={game.homeTeam.score} />
                                     </div>
 
-                                    <TeamStatsGrid box={box} />
+                                    <TeamStatsGrid />
                                 </Rect>
                                 <TeamLogoBox team={gfx.homeTeam} />
                             </Rect>
@@ -68,29 +67,42 @@ function HalftimeAdjustments({ gfx, game, box }: { gfx: AppState, game: GameStat
     );
 }
 
-function TeamStatsGrid({ box }: {box: Boxscore}) {
+function formatShooting(made: number, attempted: number): string {
+    return `${made}-${attempted}`;
+}
+
+function TeamStatsGrid() {
+    const [stats] = useObjectStoreContext<GameLiveStats>('basketball-live-team-stats');
+
+    if(!isDefined(stats) || !isDefined(stats.home) || !isDefined(stats.visitor)) { return (<></>); }
+
+    const homeStats = stats.home.teamStats;
+    const awayStats = stats.visitor.teamStats;
+
+    if(!isDefined(homeStats) || !isDefined(awayStats)) { return (<></>); }
+
     return (
         <Rect className='flex flex-col leading-20' height={396}>
             <TeamStatsRow 
-                awayVal={shotStatsDisplay(box.awayTeam.totals.stats.fieldGoals)} 
+                awayVal={formatShooting(awayStats.fgm, awayStats.fga)} 
                 stat='FG' 
-                homeVal={shotStatsDisplay(box.homeTeam.totals.stats.fieldGoals)} />
+                homeVal={formatShooting(homeStats.fgm, homeStats.fga)} />
             <TeamStatsRow 
-                awayVal={shotStatsDisplay(box.awayTeam.totals.stats.threePointers)} 
+                awayVal={formatShooting(awayStats.fgm3, awayStats.fga3)} 
                 stat='3FG' 
-                homeVal={shotStatsDisplay(box.homeTeam.totals.stats.threePointers)} />
+                homeVal={formatShooting(homeStats.fgm3, homeStats.fga3)} />
             <TeamStatsRow 
-                awayVal={shotStatsDisplay(box.awayTeam.totals.stats.freeThrows)} 
+                awayVal={formatShooting(awayStats.ftm, awayStats.fta)} 
                 stat='FT' 
-                homeVal={shotStatsDisplay(box.homeTeam.totals.stats.freeThrows)} />
+                homeVal={formatShooting(homeStats.ftm, homeStats.fta)} />
             <TeamStatsRow
-                awayVal={box.awayTeam.totals.stats.rebounds.total}
+                awayVal={awayStats.treb}
                 stat='REB'
-                homeVal={box.homeTeam.totals.stats.rebounds.total} />
+                homeVal={homeStats.treb} />
             <TeamStatsRow
-                awayVal={box.awayTeam.totals.stats.turnovers}
+                awayVal={awayStats.to}
                 stat='TO'
-                homeVal={box.homeTeam.totals.stats.turnovers} />
+                homeVal={homeStats.to} />
         </Rect>
     );
 }

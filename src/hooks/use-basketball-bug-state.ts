@@ -1,8 +1,9 @@
-import type { BasketballScorebugState } from "@/types/basketball";
+import type { BasketballScorebugState, BasketballLiveData, TextSliderState } from "@/types/basketball";
 import { useObjectStore } from "@/util/use-object-store";
 import { useEffect } from "react";
 
 export function useBasketballBugState() {
+    const key = 'basketball-scorebug-state';
     const {
         data,
         subscribe,
@@ -11,16 +12,57 @@ export function useBasketballBugState() {
     } = useObjectStore();
 
     useEffect(() => {
-        subscribe('basketball-scorebug-state');
-        return () => unsubscribe('basketball-scorebug-state');
+        subscribe(key);
+        return () => unsubscribe(key);
     }, []);
 
-    const bugState = data['basketball-scorebug-state'] as BasketballScorebugState | undefined;
+    const bugState = data[key] as BasketballScorebugState | undefined;
     const setBugState = (updater: (draft: BasketballScorebugState) => void) => {
         const draft = { ...bugState! };
         updater(draft);
-        set('basketball-scorebug-state', draft);
+        set(key, draft);
     }
 
     return { bugState, setBugState };
+}
+
+export function useBasketballLiveData() {
+    const key = 'basketball-live-data';
+    const {
+        data,
+        subscribe,
+        unsubscribe,
+    } = useObjectStore();
+
+    useEffect(() => {
+        subscribe(key);
+        return () => unsubscribe(key);
+    }, []);
+
+    const liveData = data[key] as BasketballLiveData | undefined;
+    return { liveData };
+}
+
+export function useTextSliderState() {
+    const key = 'basketball-bug-text-slider';
+    const {
+        data,
+        subscribe,
+        unsubscribe,
+        set,
+    } = useObjectStore();
+
+    useEffect(() => {
+        subscribe(key);
+        return () => unsubscribe(key);
+    }, []);
+
+    const sliderState = data[key] as TextSliderState | undefined;
+    const setSliderState = (updater: (draft: TextSliderState) => void) => {
+        const draft = { ...sliderState! };
+        updater(draft);
+        set(key, draft);
+    }
+
+    return { sliderState, setSliderState };
 }

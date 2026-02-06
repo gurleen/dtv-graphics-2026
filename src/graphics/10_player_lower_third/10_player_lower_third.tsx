@@ -1,6 +1,6 @@
 import AnimationContainer from '@/components/animation-container';
 import { Rect } from '@/components/rect';
-import type { AppState, Linescore, Player, PlayerStats, Team } from '@/data/models';
+import type { AppState, Linescore, Player, Team } from '@/data/models';
 import { useAppState, usePlayerLinescore, useTeamData } from '@/data/teams';
 import useAnimation from '@/util/use-animation';
 import useProps from '@/util/use-props';
@@ -8,8 +8,10 @@ import { Color } from 'color-core';
 import { match } from 'ts-pattern';
 import { createContext, useContext, useMemo } from 'react';
 import * as ReactDOM from 'react-dom/client';
-import Markdown from 'react-markdown';
 import MarkdownText from '@/components/markdown-text';
+import { isDefined } from '@/util/utils';
+import type { PlayerStats } from '@/types/basketball';
+import { ObjectStoreProvider } from '@/contexts/ObjectStoreContext';
 
 type StatsOptions = "NONE" | "PTS" | "REB" | "AST" | "STL" | "BLK" | "FG" | "FG%" | "3FG" | "3FG%" | "FT" | "FT%"
 
@@ -79,7 +81,9 @@ function PageRoot() {
         };
         return (
             <DataContext value={data}>
-                <PlayerLowerThird />
+                <ObjectStoreProvider>
+                    <PlayerLowerThird />
+                </ObjectStoreProvider>
             </DataContext>
         );
     }
@@ -158,7 +162,7 @@ function TextBox() {
 function StatBox() {
     const data = useContext(DataContext);
     const line = data ? usePlayerLinescore(data.isHome, data.props.playerNumber) : undefined;
-    if (!data || !line) return (<></>);
+    if (!data || !isDefined(line)) return (<></>);
 
     return (
         <div id="subtext" className='text-4xl text-white font-light flex gap-8'>
@@ -198,26 +202,20 @@ function fullPosition(position: string) {
     return position;
 }
 
-function playerPoints(stats: PlayerStats) {
-    const threes = stats.totals.threePointers.made;
-    const twos = stats.totals.fieldGoals.made - threes;
-    return (3 * threes) + (2 * twos) + stats.totals.freeThrows.made;
-}
-
 function getStatFromLine(line: PlayerStats, stat: StatsOptions) {
     return match(stat)
         .with("NONE", _ => "")
-        .with("PTS", _ => playerPoints(line))
-        .with("REB", _ => line.totals.rebounds.total)
-        .with("AST", _ => line.totals.assists)
-        .with("STL", _ => line.totals.steals)
-        .with("BLK", _ => line.totals.blocks)
-        .with("FG", _ => `${line.totals.fieldGoals.made}-${line.totals.fieldGoals.attempted}`)
-        .with("FG%", _ => line.totals.fieldGoals.percentageDisplay)
-        .with("3FG", _ => `${line.totals.threePointers.made}-${line.totals.threePointers.attempted}`)
-        .with("3FG%", _ => line.totals.threePointers.percentageDisplay)
-        .with("FT", _ => `${line.totals.freeThrows.made}-${line.totals.freeThrows.attempted}`)
-        .with("FT%", _ => line.totals.freeThrows.percentageDisplay)
+        .with("PTS", _ => line.tp)
+        .with("REB", _ => line.treb)
+        .with("AST", _ => line.ast)
+        .with("STL", _ => line.stl)
+        .with("BLK", _ => line.blk)
+        .with("FG", _ => `${line.fgm}-${line.fga}`)
+        .with("FG%", _ => line.fgpct)
+        .with("3FG", _ => `${line.fgm3}-${line.fga3}`)
+        .with("3FG%", _ => line.fg3pct)
+        .with("FT", _ => `${line.ftm}-${line.fta}`)
+        .with("FT%", _ => line.ftpct)
         .exhaustive()
 }
 

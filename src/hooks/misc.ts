@@ -1,4 +1,8 @@
+import { useGlobalSettings } from "@/contexts/GlobalSettingsContext";
+import { Sport } from "@/data/models";
+import type { PlayerInfo } from "@/types/basketball";
 import type { GameVideoFeed } from "@/types/misc";
+import { useSpxObject } from "@/util/spx";
 import { useObjectStore } from "@/util/use-object-store";
 import { useEffect } from "react";
 
@@ -30,4 +34,11 @@ export function useAroundTheConfStreams() {
 
     const streams = data['around-the-conf'];
     return { streams, setSingleStream };
+}
+
+export function useBasketballPlayers() {
+    const {settings} = useGlobalSettings();
+    const fileName = settings.sport == Sport.MensBasketball ? 'mbb_players.json' : 'wbb_players.json';
+    const { data: players } = useSpxObject<PlayerInfo[]>('basketball', fileName);
+    return players;
 }

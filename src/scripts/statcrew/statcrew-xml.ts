@@ -1,4 +1,4 @@
-import type { GameLiveStats, PlayerStats, TeamPlayers, Play, LastScoreInfo, LastScores } from "@/types/basketball";
+import type { GameLiveStats, PlayerStats, TeamPlayers, TeamStats, TeamSpecialStats, Play, LastScoreInfo, LastScores } from "@/types/basketball";
 import { watch } from "node:fs";
 import { parseStringPromise } from "xml2js";
 
@@ -58,6 +58,58 @@ function parsePlay(playXml: any, period: number): Play | null {
     hscore: attrs.hscore ? parseInt(attrs.hscore) : undefined,
     side: attrs.side,
     fastb: attrs.fastb,
+  };
+}
+
+function parseTeamStats(teamXml: any): TeamStats | null {
+  const totals = teamXml.totals?.[0];
+  if (!totals) return null;
+
+  const stats = totals.stats?.[0]?.$;
+  const special = totals.special?.[0]?.$;
+  const linescore = teamXml.linescore?.[0];
+
+  const specialStats: TeamSpecialStats = {
+    pts_to: parseInt(special?.pts_to || "0"),
+    pts_ch2: parseInt(special?.pts_ch2 || "0"),
+    pts_paint: parseInt(special?.pts_paint || "0"),
+    pts_fastb: parseInt(special?.pts_fastb || "0"),
+    pts_bench: parseInt(special?.pts_bench || "0"),
+    ties: parseInt(special?.ties || "0"),
+    leads: parseInt(special?.leads || "0"),
+    lead_time: parseInt(special?.lead_time || "0"),
+    large_lead: parseInt(special?.large_lead || "0"),
+  };
+
+  const linescoreByPeriod: number[] = (linescore?.lineprd || []).map(
+    (prd: any) => parseInt(prd.$.score || "0")
+  );
+
+  return {
+    fgm: parseInt(stats?.fgm || "0"),
+    fga: parseInt(stats?.fga || "0"),
+    fgm3: parseInt(stats?.fgm3 || "0"),
+    fga3: parseInt(stats?.fga3 || "0"),
+    ftm: parseInt(stats?.ftm || "0"),
+    fta: parseInt(stats?.fta || "0"),
+    tp: parseInt(stats?.tp || "0"),
+    blk: parseInt(stats?.blk || "0"),
+    stl: parseInt(stats?.stl || "0"),
+    ast: parseInt(stats?.ast || "0"),
+    min: parseInt(stats?.min || "0"),
+    oreb: parseInt(stats?.oreb || "0"),
+    dreb: parseInt(stats?.dreb || "0"),
+    treb: parseInt(stats?.treb || "0"),
+    pf: parseInt(stats?.pf || "0"),
+    tf: parseInt(stats?.tf || "0"),
+    to: parseInt(stats?.to || "0"),
+    dq: parseInt(stats?.dq || "0"),
+    fgpct: parseFloat(stats?.fgpct || "0"),
+    fg3pct: parseFloat(stats?.fg3pct || "0"),
+    ftpct: parseFloat(stats?.ftpct || "0"),
+    special: specialStats,
+    score: parseInt(linescore?.$?.score || "0"),
+    linescoreByPeriod,
   };
 }
 
@@ -169,6 +221,7 @@ async function parseXmlFile(filePath: string): Promise<string[]> {
         teamCode: visitorTeam.$.id,
         vh: "V",
         players,
+        teamStats: parseTeamStats(visitorTeam),
       };
 
       showTeamDiff(oldVisitorPlayers, newVisitorPlayers, "VISITOR");
@@ -191,6 +244,7 @@ async function parseXmlFile(filePath: string): Promise<string[]> {
         teamCode: homeTeam.$.id,
         vh: "H",
         players,
+        teamStats: parseTeamStats(homeTeam),
       };
 
       showTeamDiff(oldHomePlayers, newHomePlayers, "HOME");

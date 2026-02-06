@@ -1,10 +1,10 @@
 import AnimationContainer from '@/components/animation-container';
-import type { ScoreboardGame, TeamStandingsRecord } from '@/types/basketball';
+import type { ScoreboardGame } from '@/types/basketball';
 import { useSpxObject, useTeamData } from '@/util/spx';
 import useAnimation from '@/util/use-animation';
 import { isDefined } from '@/util/utils';
 import * as ReactDOM from 'react-dom/client';
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useEffect } from 'react';
 import { getTeamKnockoutLogo, type TeamInfo } from '@/types/team';
 import { Rect } from '@/components/rect';
 import _ from 'lodash';
@@ -51,8 +51,16 @@ function animation(timeline: gsap.core.Timeline) {
 
 function PageRoot() {
     const teams = useTeamData();
-    const { data: records } = useSpxObject<ScoreboardGame[]>("basketball", "mbb_scoreboard.json");
-    const {streams} = useAroundTheConfStreams();
+    const { data: records, refetch: refetchScoreboard } = useSpxObject<ScoreboardGame[]>("basketball", "mbb_scoreboard.json");
+    const { streams } = useAroundTheConfStreams();
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            refetchScoreboard();
+        }, 5000);
+
+        return () => clearInterval(interval);
+    }, [refetchScoreboard]);
 
     if (!isDefined(records) || !isDefined(teams) || !isDefined(streams)) { return null; }
 

@@ -8,9 +8,11 @@ import * as ReactDOM from 'react-dom/client';
 import { createContext, useContext } from 'react';
 import { getTeamKnockoutLogo, type TeamInfo } from '@/types/team';
 import { ZLayers } from '@/util/layers';
+import { GlobalSettingsProvider, useGlobalSettings } from '@/contexts/GlobalSettingsContext';
+import { Sport } from '@/data/models';
 
-const confLogo = "https://images.dragonstv.io/sponsors/CAAWhite.png";
-const playingTeams = [2619, 2182];
+const HOME_TEAM_ID = 2182;
+const AWAY_TEAM_ID = 2261;
 
 interface PageContextType {
     teams: TeamInfo[];
@@ -49,9 +51,19 @@ function animation(timeline: gsap.core.Timeline) {
 
 function PageRoot() {
     const teams = useTeamData();
+    if (!isDefined(teams)) { return null; }
+
+    return (
+        <GlobalSettingsProvider>
+            <StandingsDataProvider teams={teams} />
+        </GlobalSettingsProvider>
+    );
+}
+
+function StandingsDataProvider({ teams }: { teams: TeamInfo[] }) {
     const { data: records } = useSpxObject<TeamStandingsRecord[]>("basketball", "mbb_records.json");
 
-    if (!isDefined(records) || !isDefined(teams)) { return null; }
+    if (!isDefined(records)) { return null; }
 
     return (
         <PageContext.Provider value={{ teams, records }}>
@@ -93,7 +105,7 @@ function TeamRow({ teamId }: { teamId: number }) {
     if (!team || !record) { return null; }
 
     const imageUrl = getTeamKnockoutLogo(team);
-    const isPlaying = playingTeams.includes(team.team_id);
+    const isPlaying = team.team_id === HOME_TEAM_ID || team.team_id === AWAY_TEAM_ID;
 
     return (
         <Rect

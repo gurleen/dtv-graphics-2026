@@ -14,18 +14,10 @@ interface GlobalSettingsContextValue {
 
 const GlobalSettingsContext = createContext<GlobalSettingsContextValue | null>(null);
 
-function getDefaultSettings(): GlobalSettings {
-    return {
-        sport: Sport.MensBasketball,
-        homeTeamId: 2182,
-        awayTeamId: 2182
-    };
-}
-
 export function GlobalSettingsProvider({ children }: { children: ReactNode }) {
     const teams = useTeamData();
-    const { data: settings, save: saveToDisk } = useSpxObject('global', 'settings.json', {
-        defaultValue: getDefaultSettings()
+    const { data: settings, save: saveToDisk } = useSpxObject<GlobalSettings>('global', 'settings.json', {
+        defaultValue: undefined
     });
 
     if (!teams || !settings) {
@@ -37,7 +29,7 @@ export function GlobalSettingsProvider({ children }: { children: ReactNode }) {
     const awayTeam = teams.find(t => t.team_id === settings.awayTeamId);
 
     if (!homeTeam || !awayTeam) {
-        return <div>Error: Invalid team configuration</div>;
+        return <div></div>;
     }
 
     const saveSettings = (updater: (draft: GlobalSettings) => void) => {

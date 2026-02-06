@@ -1,7 +1,9 @@
 import AnimationContainer from '@/components/animation-container';
 import { Rect } from '@/components/rect';
-import type { AppState, CurrentGameState, GameState, Team } from '@/data/models';
-import { currentGameState, useAppState } from '@/data/teams';
+import { GlobalSettingsProvider, useGlobalSettings } from '@/contexts/GlobalSettingsContext';
+import { useBasketballLiveData } from '@/hooks/use-basketball-bug-state';
+import type { BasketballLiveData } from '@/types/basketball';
+import { getTeamKnockoutLogo, type TeamInfo } from '@/types/team';
 import useAnimation from '@/util/use-animation';
 import useProps from '@/util/use-props';
 import { useMemo } from 'react';
@@ -23,19 +25,19 @@ function animation(timeline: gsap.core.Timeline) {
 }
 
 function PageRoot() {
-    const appState = useAppState();
-    const gameState = currentGameState();
     const props = useProps<Props>();
+    const { liveData } = useBasketballLiveData();
 
-    return  (
-        <>
-            {gameState && appState && props && <ScoreToBreak state={gameState} gfx={appState} props={props} />}
-        </>
+    return (
+        <GlobalSettingsProvider>
+            {props && liveData && <ScoreToBreak props={props} liveData={liveData} />}
+        </GlobalSettingsProvider>
     );
 }
 
-function ScoreToBreak({ state, gfx, props }: {state: GameState, gfx: AppState, props: Props}) {
+function ScoreToBreak({ props, liveData }: { props: Props, liveData: BasketballLiveData }) {
     const container = useAnimation(animation);
+    const { homeTeam, awayTeam } = useGlobalSettings();
 
     return (
         <div ref={container} style={{ fontFamily: 'Inter' }}>
@@ -43,12 +45,12 @@ function ScoreToBreak({ state, gfx, props }: {state: GameState, gfx: AppState, p
                 <div id="score-to-break" className='flex flex-col' style={{ paddingTop: 650, paddingLeft: 75 }}>
                     <Rect width={437} height={373} color="#131313">
                         <div className='flex'>
-                            <TeamBox team={gfx.awayTeam}  />
-                            <ScoreBox score={state.awayTeam.score} isHome={false} />
+                            <TeamBox team={awayTeam}  />
+                            <ScoreBox score={liveData.awayScore} isHome={false} />
                         </div>
                         <div className='flex'>
-                            <TeamBox team={gfx.homeTeam} />
-                            <ScoreBox score={state.homeTeam.score} isHome={true} />
+                            <TeamBox team={homeTeam} />
+                            <ScoreBox score={liveData.homeScore} isHome={true} />
                         </div>
                         <BottomBar periodText={props.period} />
                     </Rect>
@@ -58,11 +60,13 @@ function ScoreToBreak({ state, gfx, props }: {state: GameState, gfx: AppState, p
     );
 }
 
-function TeamBox({team}: {team: Team }) {
+function TeamBox({team}: {team: TeamInfo }) {
+    const logoUrl = getTeamKnockoutLogo(team);
+
     return (
-        <Rect width={183} height={168} color={team.info.primaryColor}>
+        <Rect width={183} height={168} color={team.color}>
             <div>
-                <img style={{maxWidth: 400, marginLeft: -110, marginTop: -110}} src={team.info.knockoutLogoUrl + `?t=${Date.now()}`} />
+                <img style={{maxWidth: 400, marginLeft: -110, marginTop: -110}} src={logoUrl} />
             </div>
         </Rect>
     );

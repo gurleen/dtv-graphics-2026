@@ -1,7 +1,7 @@
 import { watch, type FSWatcher } from "node:fs";
 import { parseXmlFile, getStats, resetStats, getPlays, getLastScores } from "./statcrew-xml";
 import indexHtml from "./index.html";
-import type { GameLiveStats, LastScores, Play } from "@/types/basketball";
+import type { GameLiveStats, TeamStats, LastScores, Play } from "@/types/basketball";
 
 const ObjectStoreSetUrl = "https://live-data.dragonstv.io/set";
 
@@ -13,6 +13,7 @@ const clients = new Set<Client>();
 let fileWatcher: FSWatcher | null = null;
 let currentFilePath: string | null = null;
 let isWatching = false;
+let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
 function broadcastToClients(message: any) {
   const messageStr = JSON.stringify(message);
@@ -27,33 +28,63 @@ function broadcastToClients(message: any) {
 }
 
 async function pushStatsToObjectStore(stats: GameLiveStats) {
-  const req = await fetch(ObjectStoreSetUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ key: "basketball-live-stats", value: stats })
-  });
+  try {
+    await fetch(ObjectStoreSetUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ key: "basketball-live-stats", value: stats })
+    });
+  } catch (error) {
+    console.error("Error pushing stats to object store:", error);
+  }
 }
 
 async function pushPlaysToObjectStore(plays: Play[]) {
-  const req = await fetch(ObjectStoreSetUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ key: "basketball-live-plays", value: plays })
-  });
+  try {
+    await fetch(ObjectStoreSetUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ key: "basketball-live-plays", value: plays })
+    });
+  } catch (error) {
+    console.error("Error pushing plays to object store:", error);
+  }
 }
 
 async function pushLastScoresToObjectStore(lastScores: LastScores) {
-  const req = await fetch(ObjectStoreSetUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ key: "basketball-live-last-scores", value: lastScores })
-  });
+  try {
+    await fetch(ObjectStoreSetUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ key: "basketball-live-last-scores", value: lastScores })
+    });
+  } catch (error) {
+    console.error("Error pushing last scores to object store:", error);
+  }
+}
+
+async function pushTeamStatsToObjectStore(stats: GameLiveStats) {
+  const teamStats: { visitor: TeamStats | null; home: TeamStats | null } = {
+    visitor: stats.visitor?.teamStats ?? null,
+    home: stats.home?.teamStats ?? null,
+  };
+  try {
+    await fetch(ObjectStoreSetUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ key: "basketball-live-team-stats", value: teamStats })
+    });
+  } catch (error) {
+    console.error("Error pushing team stats to object store:", error);
+  }
 }
 
 async function startWatching(filePath: string) {
@@ -70,6 +101,7 @@ async function startWatching(filePath: string) {
     
     const stats = getStats();
     await pushStatsToObjectStore(stats);
+    await pushTeamStatsToObjectStore(stats);
 
     const plays = getPlays();
     await pushPlaysToObjectStore(plays);
@@ -100,19 +132,23 @@ async function startWatching(filePath: string) {
   // Start watching
   fileWatcher = watch(filePath, async (eventType) => {
     if (eventType === "change") {
-      console.log(`[${new Date().toLocaleTimeString()}] File changed, re-parsing...`);
+      // Debounce rapid successive changes
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(async () => {
+        console.log(`[${new Date().toLocaleTimeString()}] File changed, re-parsing...`);
 
-      try {
-        const changes = await parseXmlFile(filePath);
-        const stats = getStats();
-        const plays = getPlays();
-        const lastScores = getLastScores();
+        try {
+          const changes = await parseXmlFile(filePath);
+          const stats = getStats();
+          const plays = getPlays();
+          const lastScores = getLastScores();
 
-        await pushStatsToObjectStore(stats);
-        await pushPlaysToObjectStore(plays);
-        await pushLastScoresToObjectStore(lastScores);
+          await pushStatsToObjectStore(stats);
+          await pushTeamStatsToObjectStore(stats);
+          await pushPlaysToObjectStore(plays);
+          await pushLastScoresToObjectStore(lastScores);
 
-        broadcastToClients({
+          broadcastToClients({
           type: "stats_update",
           data: stats,
           changes,
@@ -130,6 +166,7 @@ async function startWatching(filePath: string) {
           message: `Error parsing file: ${error}`,
         });
       }
+      }, 200);
     }
   });
 

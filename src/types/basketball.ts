@@ -1,9 +1,14 @@
 export type StatOptions = 
     "PTS" |
+    "PPG" |
     "REB" |
+    "RPG" |
     "AST" |
+    "APG" |
     "STL" |
+    "SPG" |
     "BLK" |
+    "BPG" |
     "FG"  |
     "FG%" |
     "3FG" |
@@ -15,8 +20,11 @@ export type StatOptions =
 
 export const AvailableStats: StatOptions[] = [
     "PTS",
+    "PPG",
     "REB",
+    "RPG",
     "AST",
+    "APG",
     "STL",
     "BLK",
     "FG",
@@ -47,10 +55,15 @@ export const AvailableStatsSelect = AvailableStats.map(x => ({ value: x, label: 
 export function getStatDisplayString(stat: StatOptions): string {
     const displayMap: Record<StatOptions, string> = {
         "PTS": "POINTS",
+        "PPG": "POINTS PER GAME",
         "REB": "REBOUNDS",
+        "RPG": "REBOUNDS PER GAME",
         "AST": "ASSISTS",
+        "APG": "ASSISTS PER GAME",
         "STL": "STEALS",
+        "SPG": "STEALS PER GAME",
         "BLK": "BLOCKS",
+        "BPG": "BLOCKS PER GAME",
         "FG": "FIELD GOALS",
         "FG%": "FIELD GOAL PCT",
         "3FG": "THREE POINTERS",
@@ -69,10 +82,20 @@ export interface TeamTimerState {
     type: TimerOptions;
 }
 
+export type StatsSource = "live" | "season";
+
+export interface TeamPlayerSliderState {
+    number: number,
+    showing: boolean;
+    kind: StatsSource;
+    stats: StatOptions[];
+}
+
 export interface TeamBasketballScorebugState {
     timeouts: number;
     bonus: boolean;
     timer: TeamTimerState;
+    player: TeamPlayerSliderState;
 }
 
 export interface ComparisonStatState {
@@ -122,7 +145,33 @@ export interface PlayerStats {
   ftpct: number; // free throw percentage
 }
 
-export function getPlayerStat(stats: PlayerStats, stat: StatOptions): number {
+export interface PlayerInfo {
+  athlete_id: number;
+  team_id: number;
+  first_name: string;
+  last_name: string;
+  jersey: string;
+  position_display: string;
+  position_short: string;
+  games_played: number;
+  games_started: number;
+  points: number;
+  rebounds: number;
+  assists: number;
+  minutes: number;
+  field_goals_made: number;
+  field_goals_attempted: number;
+  three_point_field_goals_made: number;
+  three_point_field_goals_attempted: number;
+  free_throws_made: number;
+  free_throws_attempted: number;
+  steals: number;
+  blocks: number;
+  turnovers: number;
+  fouls: number;
+}
+
+export function getPlayerStat(stats: PlayerStats, stat: StatOptions): number | string {
   switch (stat) {
     case "PTS":
       return stats.tp;
@@ -135,17 +184,17 @@ export function getPlayerStat(stats: PlayerStats, stat: StatOptions): number {
     case "BLK":
       return stats.blk;
     case "FG":
-      return stats.fgm;
+      return stats.fgm + "-" + stats.fga;
     case "FG%":
-      return stats.fgpct;
+      return stats.fga > 0 ? ((stats.fgm / stats.fga) * 100).toFixed(1) + "%" : "0.0%";
     case "3FG":
-      return stats.fgm3;
+      return stats.fgm3 + "-" + stats.fga3;
     case "3FG%":
-      return stats.fg3pct;
+      return stats.fga3 > 0 ? ((stats.fgm3 / stats.fga3) * 100).toFixed(1) + "%" : "0.0%";
     case "FT":
-      return stats.ftm;
+      return stats.ftm + "-" + stats.fta;
     case "FT%":
-      return stats.ftpct;
+      return stats.fta > 0 ? ((stats.ftm / stats.fta) * 100).toFixed(1) + "%" : "0.0%";
     case "TO":
       return stats.to;
     case "PF":
@@ -153,6 +202,62 @@ export function getPlayerStat(stats: PlayerStats, stat: StatOptions): number {
     default:
       return 0;
   }
+}
+
+export function getPlayerSeasonStat(info: PlayerInfo, stat: StatOptions): number | string {
+  const gamesPlayed = info.games_played || 1; // Avoid division by zero
+  
+  switch (stat) {
+    case "PTS":
+      return info.points;
+    case "PPG":
+      return (info.points / gamesPlayed).toFixed(1);
+    case "REB":
+      return info.rebounds;
+    case "RPG":
+      return (info.rebounds / gamesPlayed).toFixed(1);
+    case "AST":
+      return info.assists;
+    case "APG":
+      return (info.assists / gamesPlayed).toFixed(1);
+    case "STL":
+      return info.steals;
+    case "SPG":
+      return (info.steals / gamesPlayed).toFixed(1);
+    case "BLK":
+      return info.blocks;
+    case "BPG":
+      return (info.blocks / gamesPlayed).toFixed(1);
+    case "FG":
+      return info.field_goals_made + "-" + info.field_goals_attempted;
+    case "FG%":
+      return info.field_goals_attempted > 0 
+        ? ((info.field_goals_made / info.field_goals_attempted) * 100).toFixed(1) + "%"
+        : "0.0%";
+    case "3FG":
+      return info.three_point_field_goals_made + "-" + info.three_point_field_goals_attempted;
+    case "3FG%":
+      return info.three_point_field_goals_attempted > 0 
+        ? ((info.three_point_field_goals_made / info.three_point_field_goals_attempted) * 100).toFixed(1) + "%"
+        : "0.0%";
+    case "FT":
+      return info.free_throws_made + "-" + info.free_throws_attempted;
+    case "FT%":
+      return info.free_throws_attempted > 0 
+        ? ((info.free_throws_made / info.free_throws_attempted) * 100).toFixed(1) + "%"
+        : "0.0%";
+    case "TO":
+      return info.turnovers;
+    case "PF":
+      return info.fouls;
+    default:
+      return 0;
+  }
+}
+
+export interface StatDisplay {
+  stat: StatOptions;
+  value: string;
 }
 
 function getShootingDisplay(made: number, attempted: number): string {
@@ -217,11 +322,56 @@ export function getTeamTotal(players: PlayerStats[], stat: StatOptions): string 
   }
 }
 
+export interface TeamSpecialStats {
+  pts_to: number; // points off turnovers
+  pts_ch2: number; // second chance points
+  pts_paint: number; // points in the paint
+  pts_fastb: number; // fast break points
+  pts_bench: number; // bench points
+  ties: number;
+  leads: number;
+  lead_time: number;
+  large_lead: number;
+}
+
+export interface TeamStats {
+  // Shooting stats
+  fgm: number;
+  fga: number;
+  fgm3: number;
+  fga3: number;
+  ftm: number;
+  fta: number;
+  tp: number;
+  // Other stats
+  blk: number;
+  stl: number;
+  ast: number;
+  min: number;
+  oreb: number;
+  dreb: number;
+  treb: number;
+  pf: number;
+  tf: number;
+  to: number;
+  dq: number;
+  // Percentages
+  fgpct: number;
+  fg3pct: number;
+  ftpct: number;
+  // Special stats
+  special: TeamSpecialStats;
+  // Linescore
+  score: number;
+  linescoreByPeriod: number[];
+}
+
 export interface TeamPlayers {
   team: string;
   teamCode: string;
   vh: string; // visitor or home
   players: PlayerStats[];
+  teamStats: TeamStats | null;
 }
 
 export interface GameLiveStats { visitor: TeamPlayers | null; home: TeamPlayers | null; };
@@ -290,6 +440,14 @@ export interface LastScores {
   home: TeamLastScores;
 }
 
+export interface BasketballLiveData {
+  homeScore: number;
+  awayScore: number;
+  clock: string; // e.g., "10:00"
+  shotClock: number; // e.g., 30
+  period: number;
+}
+
 /**
  * Converts a time string (MM:SS) to total seconds
  */
@@ -319,7 +477,8 @@ function formatDuration(totalSeconds: number): string {
 export function getTimeSinceLastScore(
   lastScore: LastScoreInfo | null,
   currentPeriod: number,
-  currentClock: string
+  currentClock: string,
+  minutesInPeriod: number
 ): string {
   if (!lastScore) {
     return "0:00";
@@ -342,10 +501,10 @@ export function getTimeSinceLastScore(
 
     // Full periods between the last score period and current period
     const periodsBetween = currentPeriod - lastScore.period - 1;
-    const fullPeriodsTime = periodsBetween * 20 * 60; // 20 minutes per period
+    const fullPeriodsTime = periodsBetween * minutesInPeriod * 60;
 
     // Time elapsed in current period (from start of period to current clock)
-    const timeElapsedInCurrentPeriod = (20 * 60) - currentSeconds; // 20 min period
+    const timeElapsedInCurrentPeriod = (minutesInPeriod * 60) - currentSeconds;
 
     const totalElapsed = timeRemainingInLastScorePeriod + fullPeriodsTime + timeElapsedInCurrentPeriod;
     return formatDuration(totalElapsed);

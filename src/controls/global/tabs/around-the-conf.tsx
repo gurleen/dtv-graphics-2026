@@ -6,6 +6,9 @@ import type { TeamInfo } from "@/types/team";
 import { getTeamKnockoutLogo, getTeamLogo } from "@/types/team";
 import { useTeamData, useSpxObject } from "@/util/spx";
 import { isDefined } from "@/util/utils";
+import { useEffect } from "react";
+import { useGlobalSettings } from "@/contexts/GlobalSettingsContext";
+import { Sport } from "@/data/models";
 
 interface GameRowProps {
     game: ScoreboardGame;
@@ -69,8 +72,18 @@ function GameRow({ game, homeTeam, awayTeam, feed, setSingleStream }: GameRowPro
 
 export function AroundTheConfTab() {
     const teams = useTeamData();
-    const { data: records } = useSpxObject<ScoreboardGame[]>("basketball", "scoreboard.json");
+    const { settings } = useGlobalSettings();
+    const scoreboardFile = settings?.sport === Sport.MensBasketball ? "mbb_scoreboard.json" : "wbb_scoreboard.json";
+    const { data: records, refetch: refetchScoreboard } = useSpxObject<ScoreboardGame[]>("basketball", scoreboardFile);
     const {streams, setSingleStream } = useAroundTheConfStreams();
+    
+    useEffect(() => {
+        const interval = setInterval(() => {
+            refetchScoreboard();
+        }, 5000);
+
+        return () => clearInterval(interval);
+    }, [refetchScoreboard]);
 
     if (!isDefined(records) || !isDefined(teams) || !isDefined(streams)) { return (
         <div className="flex items-center justify-center">

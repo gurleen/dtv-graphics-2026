@@ -1,6 +1,8 @@
 import useSWR from "swr"
 import { useState, useEffect } from "react"
 import type { TeamData, AppState, CurrentGameState, GameState, Boxscore } from "./models";
+import { useObjectStoreContext } from "@/contexts/ObjectStoreContext";
+import type { GameLiveStats } from "@/types/basketball";
 
 const API_BASE_URL = "http://localhost:5069"
 
@@ -52,7 +54,7 @@ export function useBoxscore() {
 }
 
 export function usePlayerLinescore(home: boolean, number: string) {
-    const data = useBoxscore();
-    const team = home ? data?.homeTeam : data?.awayTeam;
-    return team?.players.find(x => x.jerseyNumber.toString() == number);
+    const [stats] = useObjectStoreContext<GameLiveStats>('basketball-live-stats');
+    const team = home ? stats?.home : stats?.visitor;
+    return team?.players.find(x => x.shirtNumber == number);
 }
