@@ -1,18 +1,22 @@
 import AnimationContainer from '@/components/animation-container';
 import { Rect } from '@/components/rect';
-import type { AppState, Team } from '@/data/models';
-import { useAppState } from '@/data/teams';
+import { GlobalSettingsProvider, useGlobalSettings } from '@/contexts/GlobalSettingsContext';
+import { Sport } from '@/data/models';
+import { getTeamKnockoutLogo } from '@/types/team';
 import useAnimation from '@/util/use-animation';
 import { useMemo } from 'react';
 import * as ReactDOM from 'react-dom/client';
 
 const sponsorLogo = "https://images.dragonstv.io/sponsors/Independence.png";
 
-// const confLogo = "https://images.dragonstv.io/sponsors/CAAWhite.png";
-// const sportText = "DREXEL BASKETBALL PRESENTED BY";
 
-const confLogo = "https://images.dragonstv.io/sponsors/EIWA.png";
-const sportText = "DREXEL WRESTLING PRESENTED BY";
+const wrestlingConfLogo = "https://images.dragonstv.io/sponsors/EIWA.png";
+const basketballConfLogo = "https://images.dragonstv.io/sponsors/CAAWhite.png";
+const confLogoForSport = (sport: Sport) => sport == Sport.Wrestling ? wrestlingConfLogo : basketballConfLogo;
+
+const wrestlingText = "DREXEL WRESTLING PRESENTED BY";
+const basketballText = "DREXEL BASKETBALL PRESENTED BY";
+const textForSport = (sport: Sport) => sport == Sport.Wrestling ? wrestlingText : basketballText;
 
 
 function animation(timeline: gsap.core.Timeline) {
@@ -34,16 +38,14 @@ function animation(timeline: gsap.core.Timeline) {
 }
 
 function PageRoot() {
-    const appState = useAppState();
-
     return (
-        <>
-            {appState && <Matchup gfx={appState} />}
-        </>
+        <GlobalSettingsProvider>
+            {<Matchup />} 
+        </GlobalSettingsProvider>
     );
 }
 
-function Matchup({ gfx }: { gfx: AppState }) {
+function Matchup() {
     const container = useAnimation(animation);
 
     return (
@@ -54,7 +56,7 @@ function Matchup({ gfx }: { gfx: AppState }) {
                         <SponsorBar />
                     </div>
                     <div id='main-area-mask' className='overflow-hidden'>
-                        <MainArea gfx={gfx} />
+                        <MainArea />
                     </div>
                     <div id='bottom-area-mask' className='overflow-hidden'>
                         <BottomBar />
@@ -65,35 +67,42 @@ function Matchup({ gfx }: { gfx: AppState }) {
     );
 }
 
-function MainArea({ gfx }: { gfx: AppState }) {
+function MainArea() {
     return (
         <div id="matchup-middle" className='flex'>
-            <TeamBox team={gfx.awayTeam} isHome={false} />
+            <TeamBox isHome={false} />
             <CAABox />
-            <TeamBox team={gfx.homeTeam} isHome={true} />
+            <TeamBox isHome={true} />
         </div>
     );
 }
 
-function TeamBox({ team, isHome }: { team: Team, isHome: boolean }) {
+function TeamBox({ isHome }: { isHome: boolean }) {
+    const { homeTeam, awayTeam } = useGlobalSettings();
+    const teamInfo = isHome ? homeTeam : awayTeam;
+    const logoUrl = getTeamKnockoutLogo(teamInfo);
+
     const flexDir = useMemo(() => isHome ? 'flex-row-reverse' : 'flex-row', [isHome]);
     const textAlign = useMemo(() => isHome ? 'items-start' : '', [isHome]);
     const idPrefix = useMemo(() => isHome ? 'home' : 'away', [isHome]);
 
     return (
-        <Rect id={`${idPrefix}-box`} width={785} height={189} color={team.info.primaryColor} className={`flex ${flexDir}`}>
+        <Rect id={`${idPrefix}-box`} width={785} height={189} color={teamInfo.color} className={`flex ${flexDir}`}>
             <Rect width={300} height={189} id={`${idPrefix}-logo`}>
-                <img src={team.info.knockoutLogoUrl + `?t=${Date.now()}`} style={{ marginTop: -50, scale: 1.5 }} />
+                <img src={logoUrl} style={{ marginTop: -50, scale: 1.5 }} />
             </Rect>
             <Rect width={485} height={189} className={`flex flex-col items-end px-5 text-white justify-center ${textAlign}`}>
-                <p id={`${idPrefix}-school-name`} className='font-medium text-6xl'>{team.info.schoolName.toUpperCase()}</p>
-                <p id={`${idPrefix}-team-name`} className='font-black text-7xl'>{team.info.teamName.toUpperCase()}</p>
+                <p id={`${idPrefix}-school-name`} className='font-medium text-6xl'>{teamInfo.short_name.toUpperCase()}</p>
+                <p id={`${idPrefix}-team-name`} className='font-black text-7xl'>{teamInfo.mascot.toUpperCase()}</p>
             </Rect>
         </Rect>
     );
 }
 
 function CAABox() {
+    const { settings } = useGlobalSettings();
+    const confLogo = confLogoForSport(settings.sport);
+
     return (
         <Rect id="caa-box" width={350} height={189} color='#141515' className='flex justify-center items-center p-5'>
             <img id="caa-logo" src={confLogo} />
@@ -102,6 +111,8 @@ function CAABox() {
 }
 
 function SponsorBar() {
+    const { settings } = useGlobalSettings();
+    const sportText = textForSport(settings.sport);
     return (
         <div id='sponsor-bar' className='flex justify-center'>
             <Rect height={72} color='#141414' className='flex gap-5 items-center justify-center p-7'>
