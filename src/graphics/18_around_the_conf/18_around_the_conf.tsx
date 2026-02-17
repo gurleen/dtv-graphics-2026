@@ -13,6 +13,8 @@ import { ZLayers } from '@/util/layers';
 import ReactPlayer from 'react-player';
 import FadeContainer from '@/components/fade-container';
 import { useAroundTheConfStreams } from '@/hooks/misc';
+import { GlobalSettingsProvider } from '@/contexts/GlobalSettingsContext';
+import { BasketballScoreboardProvider, useBasketballScoreboardContext } from '@/contexts/BasketballScoreboardContext';
 
 
 const confLogo = "https://images.dragonstv.io/sponsors/CAAWhite.png";
@@ -50,8 +52,18 @@ function animation(timeline: gsap.core.Timeline) {
 }
 
 function PageRoot() {
+    return (
+        <GlobalSettingsProvider>
+            <BasketballScoreboardProvider>
+                <PageContextWrapper />
+            </BasketballScoreboardProvider>
+        </GlobalSettingsProvider>
+    );
+}
+
+function PageContextWrapper() {
     const teams = useTeamData();
-    const { data: records, refetch: refetchScoreboard } = useSpxObject<ScoreboardGame[]>("basketball", "wbb_scoreboard.json");
+    const { games, refetchScoreboard } = useBasketballScoreboardContext();
     const { streams } = useAroundTheConfStreams();
 
     useEffect(() => {
@@ -62,10 +74,10 @@ function PageRoot() {
         return () => clearInterval(interval);
     }, [refetchScoreboard]);
 
-    if (!isDefined(records) || !isDefined(teams) || !isDefined(streams)) { return null; }
+    if (!isDefined(games) || !isDefined(teams) || !isDefined(streams)) { return null; }
 
     return (
-        <PageContext.Provider value={{ teams, games: records, streams }}>
+        <PageContext.Provider value={{ teams, games, streams }}>
             <AroundTheConf />
         </PageContext.Provider>
     );
@@ -73,7 +85,7 @@ function PageRoot() {
 
 function AroundTheConf() {
     const container = useAnimation(animation);
-    const { games, teams } = usePageContext();
+    const { games } = usePageContext();
 
     return (
         <div id="container" ref={container} style={{ fontFamily: 'Zuume' }}>
