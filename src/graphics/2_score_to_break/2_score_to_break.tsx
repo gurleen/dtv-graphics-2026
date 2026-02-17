@@ -5,6 +5,7 @@ import type { GameState } from '@/data/models';
 import { useBasketballLiveData } from '@/hooks/use-basketball-bug-state';
 import type { BasketballLiveData } from '@/types/basketball';
 import { getTeamKnockoutLogo, type TeamInfo } from '@/types/team';
+import { createContextFrom } from '@/util/context-factory';
 import useAnimation from '@/util/use-animation';
 import { useGameState } from '@/util/use-live-stats-manager';
 import useProps from '@/util/use-props';
@@ -26,21 +27,35 @@ function animation(timeline: gsap.core.Timeline) {
         .to("#score-to-break", { opacity: 0 })
 }
 
-function PageRoot() {
-    const props = useProps<Props>();
+function getPageData() {
+    // const props = useProps<Props>();
+    const props = { period: "End of 3rd Quarter" } as Props; // Mocked props for testing
     const gameState = useGameState();
     const { liveData } = useBasketballLiveData();
 
+    if (!props || !liveData || !gameState) { 
+        return null; 
+    }
+    
+    return { props, liveData, gameState };
+}
+
+const { Provider: PageDataProvider, useCustomContext: usePageDataContext } = createContextFrom(getPageData);
+
+function PageRoot() {
     return (
         <GlobalSettingsProvider>
-            {props && liveData && gameState && <ScoreToBreak props={props} liveData={liveData} gameState={gameState} />}
+            <PageDataProvider>
+                <ScoreToBreak />
+            </PageDataProvider>
         </GlobalSettingsProvider>
     );
 }
 
-function ScoreToBreak({ props, liveData, gameState }: { props: Props, liveData: BasketballLiveData, gameState: GameState }) {
+function ScoreToBreak() {
     const container = useAnimation(animation);
     const { homeTeam, awayTeam } = useGlobalSettings();
+    const { props, gameState } = usePageDataContext()!;
 
     return (
         <div ref={container} style={{ fontFamily: 'Inter' }}>
