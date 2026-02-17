@@ -82,7 +82,14 @@ function SliderPresetRow({ preset, selected, onClick, onSave }: { preset: Slider
 function Page() {
     const {presets, setPresets} = useLocalStorage();
     const [selectedIndex, setSelectedIndex] = useState(0);
-    const { setSliderState } = useTextSliderState();
+    const { sliderState, setSliderState } = useTextSliderState();
+    const playing = sliderState?.showing ?? false;
+
+    function update() {
+        setSliderState(draft => {
+            draft.showing = !playing;
+        });
+    }
 
     function addPreset() {
         setPresets([...presets, { title: "TITLE", subtitle: "SUBTITLE" }]);
@@ -97,14 +104,6 @@ function Page() {
     }
 
     async function push(preset: SliderPreset, index: number) {
-        // const result = await fetch("http://localhost:5000/api/state/game/setTextSlider", {
-        //     method: 'POST',
-        //     headers: { 'Content-Type': 'application/json' },
-        //     body: JSON.stringify(preset)
-        // });
-        // const responseText = await result.text();
-        // console.log("PUSH RESULT:", responseText);
-        // if(responseText == "OK") { setSelectedIndex(index); }
         setSliderState(draft => {
             draft.title = preset.title;
             draft.subtitle = preset.subtitle;
@@ -138,6 +137,12 @@ function Page() {
                         </tr>
                     </tbody>
                 </table>
+                <button
+                    className={`w-full mt-2 text-white cursor-pointer py-1 ${playing ? 'bg-green-700 hover:bg-green-800' : 'bg-red-700 hover:bg-red-800'}`}
+                    onClick={update}
+                >
+                    {playing ? 'TOGGLE OFF' : 'TOGGLE ON'}
+                </button>
             </fieldset>
         </div>
     );

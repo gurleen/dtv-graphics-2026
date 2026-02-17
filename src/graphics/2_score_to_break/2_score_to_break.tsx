@@ -1,10 +1,12 @@
 import AnimationContainer from '@/components/animation-container';
 import { Rect } from '@/components/rect';
 import { GlobalSettingsProvider, useGlobalSettings } from '@/contexts/GlobalSettingsContext';
+import type { GameState } from '@/data/models';
 import { useBasketballLiveData } from '@/hooks/use-basketball-bug-state';
 import type { BasketballLiveData } from '@/types/basketball';
 import { getTeamKnockoutLogo, type TeamInfo } from '@/types/team';
 import useAnimation from '@/util/use-animation';
+import { useGameState } from '@/util/use-live-stats-manager';
 import useProps from '@/util/use-props';
 import { useMemo } from 'react';
 import * as ReactDOM from 'react-dom/client';
@@ -26,16 +28,17 @@ function animation(timeline: gsap.core.Timeline) {
 
 function PageRoot() {
     const props = useProps<Props>();
+    const gameState = useGameState();
     const { liveData } = useBasketballLiveData();
 
     return (
         <GlobalSettingsProvider>
-            {props && liveData && <ScoreToBreak props={props} liveData={liveData} />}
+            {props && liveData && gameState && <ScoreToBreak props={props} liveData={liveData} gameState={gameState} />}
         </GlobalSettingsProvider>
     );
 }
 
-function ScoreToBreak({ props, liveData }: { props: Props, liveData: BasketballLiveData }) {
+function ScoreToBreak({ props, liveData, gameState }: { props: Props, liveData: BasketballLiveData, gameState: GameState }) {
     const container = useAnimation(animation);
     const { homeTeam, awayTeam } = useGlobalSettings();
 
@@ -46,11 +49,11 @@ function ScoreToBreak({ props, liveData }: { props: Props, liveData: BasketballL
                     <Rect width={437} height={373} color="#131313">
                         <div className='flex'>
                             <TeamBox team={awayTeam}  />
-                            <ScoreBox score={liveData.awayScore} isHome={false} />
+                            <ScoreBox score={gameState.awayTeam.score} isHome={false} />
                         </div>
                         <div className='flex'>
                             <TeamBox team={homeTeam} />
-                            <ScoreBox score={liveData.homeScore} isHome={true} />
+                            <ScoreBox score={gameState.homeTeam.score} isHome={true} />
                         </div>
                         <BottomBar periodText={props.period} />
                     </Rect>

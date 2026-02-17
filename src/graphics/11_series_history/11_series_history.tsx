@@ -137,7 +137,7 @@ function SeriesHistory() {
                                     <div id="note-box" className='flex flex-col gap-2'>
                                         <div className='flex w-full justify-between px-5 pt-5'>
                                             <p className='font-extralight'>CURRENT STREAK</p>
-                                            <p className='font-bold'>L3</p>
+                                            <p className='font-bold'>{props.homeStreak}</p>
                                         </div>
 
                                         <div className='flex w-full justify-between px-5 pb-5'>

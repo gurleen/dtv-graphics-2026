@@ -9,24 +9,19 @@ import { useGSAP } from "@gsap/react";
 import FadeContainer from "@/components/fade-container";
 import { type BasketballScorebugData, type GameInfo, type TeamInfo } from "./props";
 import { Color } from "color-core";
-import { useAppState } from "@/data/teams";
-import { useGameState } from "@/util/use-live-stats-manager";
 import { FadeText } from "@/components/fade-text";
 import { ZLayers } from "@/util/layers";
 import { GlobalSettingsProvider, useGlobalSettings } from "@/contexts/GlobalSettingsContext";
 import { BasketballBugStateProvider, useBasketballBugStateContext } from "@/contexts/BasketballBugStateContext";
 import { ObjectStoreProvider, useObjectStoreContext } from "@/contexts/ObjectStoreContext";
 import { getStatDisplayString, getTeamTotal, getTimerOptionDisplayString, getTimeSinceLastScore, type PlayerInfo, type GameLiveStats, type LastScores, type StatOptions, type StatDisplay, getPlayerStat, getPlayerSeasonStat, type StatsSource, type TextSliderState } from "@/types/basketball";
-import { isDefined, ordinalize } from "@/util/utils";
-import { useSpxObject } from "@/util/spx";
-import type { GlobalSettings } from "@/types/globalSettings";
+import { isDefined } from "@/util/utils";
 import { getTeamKnockoutLogo } from "@/types/team";
 import { useBasketballLiveData, useTextSliderState } from "@/hooks/use-basketball-bug-state";
 import { useBasketballPlayers } from "@/hooks/misc";
+import { useGameState } from "@/util/use-live-stats-manager";
 
 
-const homeId = 2182;
-const awayId = 2448;
 const sponsorLogo = "https://images.dragonstv.io/sponsors/Independence.png";
 
 const flexReverseForHome = (isHome: boolean) => isHome ? "flex-row-reverse" : "";
@@ -46,29 +41,30 @@ interface Props {
 
 function getTeams(): BasketballScorebugData | undefined {
     const settings = useGlobalSettings();
+    const gameState = useGameState();
     const { liveData: basketballLiveData } = useBasketballLiveData();
     // const props = useProps<Props>();
     const props = { infoBoxCovered: "0", infoBoxText: 'FINAL' }
 
-    if (!props || !settings || !basketballLiveData) return undefined;
+    if (!props || !settings || !basketballLiveData || !gameState) return undefined;
 
     return {
         homeTeam: {
             abbreviation: settings.homeTeam.abbreviation,
             color: settings.homeTeam.color,
-            score: basketballLiveData.homeScore,
+            score: gameState.homeTeam.score,
             logoUrl: getTeamKnockoutLogo(settings.homeTeam)
         },
         awayTeam: {
             abbreviation: settings.awayTeam.abbreviation,
             color: settings.awayTeam.color,
-            score: basketballLiveData.awayScore,
+            score: gameState.awayTeam.score,
             logoUrl: getTeamKnockoutLogo(settings.awayTeam)
         },
         info: {
-            clock: basketballLiveData.clock,
-            period: ordinalize(basketballLiveData.period),
-            shotClock: basketballLiveData.shotClock
+            clock: gameState.clockDisplay,
+            period: gameState.periodDisplay,
+            shotClock: gameState.shotClock
         },
         infoBoxCovered: props.infoBoxCovered == "1",
         infoBoxText: props.infoBoxText
@@ -140,8 +136,9 @@ function playerSliderAnimation(timeline: gsap.core.Timeline) {
 }
 
 function PlayerSlider({ isHome, props }: { isHome: boolean, props: BasketballScorebugData }) {
+    const settings = useGlobalSettings();
     const team = isHome ? props.homeTeam : props.awayTeam;
-    const teamId = isHome ? homeId : awayId;
+    const teamId = isHome ? settings.homeTeam.team_id : settings.awayTeam.team_id;
     const { bugState } = useBasketballBugStateContext();
     const sliderState = isHome ? bugState.homeTeam.player : bugState.awayTeam.player;
     const players = useBasketballPlayers();

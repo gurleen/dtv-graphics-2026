@@ -9,10 +9,7 @@ import { createContext, useContext } from 'react';
 import { getTeamKnockoutLogo, type TeamInfo } from '@/types/team';
 import { ZLayers } from '@/util/layers';
 import { GlobalSettingsProvider, useGlobalSettings } from '@/contexts/GlobalSettingsContext';
-import { Sport } from '@/data/models';
-
-const HOME_TEAM_ID = 2182;
-const AWAY_TEAM_ID = 2261;
+import { ConfStandingsDataProvider, useConfStandingsContext } from '@/contexts/ConfStandingsContext';
 
 interface PageContextType {
     teams: TeamInfo[];
@@ -55,13 +52,15 @@ function PageRoot() {
 
     return (
         <GlobalSettingsProvider>
-            <StandingsDataProvider teams={teams} />
+            <ConfStandingsDataProvider>
+                <StandingsDataProvider teams={teams} />
+            </ConfStandingsDataProvider>
         </GlobalSettingsProvider>
     );
 }
 
 function StandingsDataProvider({ teams }: { teams: TeamInfo[] }) {
-    const { data: records } = useSpxObject<TeamStandingsRecord[]>("basketball", "mbb_records.json");
+    const { records } = useConfStandingsContext();
 
     if (!isDefined(records)) { return null; }
 
@@ -98,6 +97,7 @@ function CAAStandings() {
 }
 
 function TeamRow({ teamId }: { teamId: number }) {
+    const { homeTeam, awayTeam } = useGlobalSettings();
     const { teams, records } = usePageContext();
     const team = teams.find(t => t.team_id === teamId);
     const record = records.find(r => r.team_id === teamId);
@@ -105,7 +105,7 @@ function TeamRow({ teamId }: { teamId: number }) {
     if (!team || !record) { return null; }
 
     const imageUrl = getTeamKnockoutLogo(team);
-    const isPlaying = team.team_id === HOME_TEAM_ID || team.team_id === AWAY_TEAM_ID;
+    const isPlaying = team.team_id === homeTeam.team_id || team.team_id === awayTeam.team_id;
 
     return (
         <Rect

@@ -51,7 +51,7 @@ function animation(timeline: gsap.core.Timeline) {
 
 function PageRoot() {
     const teams = useTeamData();
-    const { data: records, refetch: refetchScoreboard } = useSpxObject<ScoreboardGame[]>("basketball", "mbb_scoreboard.json");
+    const { data: records, refetch: refetchScoreboard } = useSpxObject<ScoreboardGame[]>("basketball", "wbb_scoreboard.json");
     const { streams } = useAroundTheConfStreams();
 
     useEffect(() => {

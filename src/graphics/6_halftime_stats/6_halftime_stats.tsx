@@ -6,10 +6,11 @@ import * as ReactDOM from 'react-dom/client';
 import { Rect } from '@/components/rect';
 import { ZLayers } from '@/util/layers';
 import { ObjectStoreProvider, useObjectStoreContext } from '@/contexts/ObjectStoreContext';
-import { type GameLiveStats, getTeamTotal, type StatOptions } from '@/types/basketball';
+import { type TeamStats } from '@/types/basketball';
 import { isDefined } from '@/util/utils';
 
 const sponsorLogo = "https://images.dragonstv.io/sponsors/DrexelPT.png";
+type CombinedTeamStats = { visitor: TeamStats | null; home: TeamStats | null };
 
 function animation(timeline: gsap.core.Timeline) {
     timeline.from("#halftime-stats-mask", { duration: 0.5, x: "-=100", opacity: 0, ease: "power3.out" })
@@ -27,12 +28,22 @@ function PageRoot() {
 
     return (
         <ObjectStoreProvider>
-            {appState && gameState && <HalftimeAdjustments gfx={appState} game={gameState} />}
+            {appState && gameState && <StatsLoader gfx={appState} game={gameState} />}
         </ObjectStoreProvider>
     );
 }
 
-function HalftimeAdjustments({ gfx, game }: { gfx: AppState, game: GameState }) {
+function StatsLoader({ gfx, game }: { gfx: AppState, game: GameState }) {
+    const [stats] = useObjectStoreContext<CombinedTeamStats>('basketball-live-team-stats');
+
+    if(!isDefined(stats)) { return (<></>); }
+
+    return (
+        <HalftimeAdjustments gfx={gfx} game={game} stats={stats} />
+    );
+}
+
+function HalftimeAdjustments({ gfx, game, stats }: { gfx: AppState, game: GameState, stats: CombinedTeamStats }) {
     const container = useAnimation(animation);
 
     return (
@@ -53,7 +64,7 @@ function HalftimeAdjustments({ gfx, game }: { gfx: AppState, game: GameState }) 
                                         <TeamScoreBox name={gfx.homeTeam.info.abbreviation} score={game.homeTeam.score} />
                                     </div>
 
-                                    <TeamStatsGrid />
+                                    <TeamStatsGrid stats={stats} />
                                 </Rect>
                                 <TeamLogoBox team={gfx.homeTeam} />
                             </Rect>
@@ -71,13 +82,13 @@ function formatShooting(made: number, attempted: number): string {
     return `${made}-${attempted}`;
 }
 
-function TeamStatsGrid() {
-    const [stats] = useObjectStoreContext<GameLiveStats>('basketball-live-team-stats');
+function TeamStatsGrid({stats}: { stats: CombinedTeamStats }) {
+    
 
     if(!isDefined(stats) || !isDefined(stats.home) || !isDefined(stats.visitor)) { return (<></>); }
 
-    const homeStats = stats.home.teamStats;
-    const awayStats = stats.visitor.teamStats;
+    const homeStats = stats.home;
+    const awayStats = stats.visitor;
 
     if(!isDefined(homeStats) || !isDefined(awayStats)) { return (<></>); }
 
